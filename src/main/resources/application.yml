@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: sbweek3
+
+  datasource:
+    url: jdbc:mysql://localhost:3308/ebrainsoft_study
+    username: ebsoft
+    password: ebsoft
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  mvc:
+    view:
+      prefix: /WEB-INF/views/jsp/
+      suffix: .jsp
+
+server:
+  servlet:
+    jsp:
+      init-parameters:
+        development: true
+
+# Mybatis
+mybatis:
+  # mapper location
+  mapper-locations: classpath:mappers/*.xml
+  # column name to camel case
+  configuration:
+    map-underscore-to-camel-case: true
+
+image:
+  upload:
+    dir: C:\STUDY\workspace\img

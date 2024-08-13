@@ -1,16 +1,14 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.3.2'
-    id 'io.spring.dependency-management' version '1.1.6'
+    id 'org.springframework.boot' version '2.7.4'
+    id 'io.spring.dependency-management' version '1.0.14.RELEASE'
 }
 
-group = 'com.sb'
+group = 'com.job'
 version = '0.0.1-SNAPSHOT'
 
 java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-    }
+    sourceCompatibility = '17'
 }
 
 configurations {
@@ -22,28 +20,38 @@ configurations {
 repositories {
     mavenCentral()
 }
-
 dependencies {
-    //Spring Boot 관련 의존성
+    // Spring Boot 관련 의존성
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-web-services'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
-    //MyBatis 관련 의존성
-    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
-    testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.3'
+    // MyBatis 관련 의존성
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.4'  // MyBatis Spring Boot Starter 2.x.x 버전
+    testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:2.1.4'  // MyBatis 테스트 라이브러리 2.x.x 버전
 
-    //Lombok 관련 의존성
+    // Lombok 관련 의존성
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
-    //MySQL 관련 의존성
-    runtimeOnly 'com.mysql:mysql-connector-j'
+    // MySQL 관련 의존성
+    runtimeOnly 'mysql:mysql-connector-java:8.0.28'  // MySQL 커넥터는 최신 버전 그대로 사용 가능
 
-    //JUnit 관련 의존성
+    // JDBC 라이브러리 추가
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+
+    // JUnit 관련 의존성
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // JSP 및 서블릿 관련 의존성
+    implementation "org.apache.tomcat.embed:tomcat-embed-jasper" // JSP 지원을 위한 Tomcat Jasper 의존성
+    implementation 'javax.servlet:javax.servlet-api:4.0.1' // 서블릿 API 의존성 (Spring Boot 2.x.x 버전과 호환)
+    implementation 'javax.servlet.jsp:javax.servlet.jsp-api:2.3.3' // JSP API 의존성 (Spring Boot 2.x.x 버전과 호환)
+    implementation 'javax.servlet:jstl:1.2' // JSTL API 의존성
+    compileOnly 'org.apache.tomcat.embed:tomcat-embed-jasper'
 }
+
 
 tasks.named('test') {
     useJUnitPlatform()
