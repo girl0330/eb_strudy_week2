@@ -1,5 +1,6 @@
 package com.sb.sbweek3.dto;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -7,9 +8,11 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
+@Builder
 public class BoardInfoDTO {
     private int boardId; // 게시글 ID
     private int categoryId; // 카테고리 ID
+    private String categoryName; //카테고리 이름
     private String writer; // 작성자
     private int password; // 비밀번호
     private String title; // 제목

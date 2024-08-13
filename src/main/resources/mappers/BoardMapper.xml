@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sb.sbweek3.board.free.BoardMapper">
+    <select id="getList" resultType="com.sb.sbweek3.dto.BoardInfoDTO">
+        SELECT
+            bi.board_id,
+            bi.category_id,
+            (SELECT ci.category FROM category_info ci WHERE ci.category_id = bi.category_id)AS category_name,
+            bi.writer,
+            bi.password,
+            bi.title,
+            bi.content,
+            bi.view_count,
+            bi.system_register_datetime,
+            bi.system_update_datetime
+        FROM board_info bi
+    </select>
+</mapper>
