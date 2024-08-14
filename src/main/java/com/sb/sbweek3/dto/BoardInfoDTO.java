@@ -1,14 +1,16 @@
 package com.sb.sbweek3.dto;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
 @ToString
-@Builder
 public class BoardInfoDTO {
     private int boardId; // 게시글 ID
     private int categoryId; // 카테고리 ID
@@ -20,4 +22,6 @@ public class BoardInfoDTO {
     private int viewCount; // 조회수
     private String systemRegisterDatetime; // 등록일시
     private String systemUpdateDatetime; // 수정일시
+
+    private List<MultipartFile> files = new ArrayList<>(); // 첨부파일 List
 }

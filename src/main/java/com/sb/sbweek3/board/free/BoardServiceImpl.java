@@ -16,4 +16,10 @@ public class BoardServiceImpl implements BoardService{
         System.out.println("보드 리스트 서비스 ^^");
         return boardMapper.getList();
     }
+
+    public int saveBoard(BoardInfoDTO boardInfoDTO) {
+        boardMapper.saveBoard(boardInfoDTO);
+        return boardInfoDTO.getBoardId();
+
+    }
 }

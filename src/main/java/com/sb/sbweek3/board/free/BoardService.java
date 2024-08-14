@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface BoardService {
     List<BoardInfoDTO> getList();
+
+    int saveBoard(BoardInfoDTO boardInfoDTO);
 }

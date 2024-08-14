@@ -1,0 +1,158 @@
+/* 기본 페이지 설정 */
+body {
+    font-family: Arial, sans-serif;
+}
+
+#wrap {
+    width: 1200px; /* 페이지의 넓이를 1200px로 설정 */
+    margin: auto;
+}
+
+/* 폼 컨테이너 설정 */
+.form-container {
+    width: 700px;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* 테이블 설정 */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* 테이블 셀 설정 */
+td {
+    padding: 10px;
+    border: 1px solid #ccc;
+}
+
+/* 레이블 설정 */
+.label {
+    width: 150px;
+    font-weight: bold;
+    background-color: #f9f9f9;
+    text-align: right;
+}
+
+/* 입력 필드 설정 */
+.input-field {
+    padding-left: 20px;
+}
+
+.input-field input[type="text"],
+.input-field textarea,
+.input-field select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.input-field textarea {
+    height: 100px;
+}
+
+/* 카테고리, 작성자, 비밀번호 필드 크기 조정 */
+.input-field select#category,
+.input-field input#writer {
+    width: 40%; /* 크기를 40%로 줄임 */
+}
+
+/* 비밀번호 입력 필드 설정 */
+.password-container {
+    display: flex;
+    gap: 10px; /* 두 input 태그 사이의 간격 */
+    width: 80%; /* 크기를 40%로 줄임 */
+}
+
+.password-container input[type="password"] {
+    flex: 1; /* 두 input 태그가 동일한 너비를 차지하도록 설정 */
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+/* 파일 입력 설정 */
+.file-input {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.custom-file-input {
+    display: none; /* 기본 파일 입력 필드를 숨김 */
+}
+
+.file-input input[type="text"] {
+    flex: 1;
+    width: 70%; /* 파일 제목 입력 필드의 너비를 줄임 */
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.file-input label {
+    padding: 8px 15px;
+    margin-left: 10px;
+    background-color: #ccc;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* 폼 동작 버튼 설정 */
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.form-actions button {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.form-actions button.cancel {
+    background-color: #f44336;
+}
+
+/* 버튼 모양 스타일링 */
+.form-actions .button {
+    display: inline-block;
+    padding: 10px 20px;
+    margin: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    color: #fff;
+    background-color: #007bff; /* 기본 버튼 색상 */
+    border: 1px solid #007bff; /* 버튼 경계선 */
+    border-radius: 4px; /* 버튼 모서리를 둥글게 */
+    cursor: pointer;
+}
+
+.form-actions .button:hover {
+    background-color: #0056b3; /* 호버 시 버튼 색상 */
+    border-color: #0056b3;
+}
+
+.form-actions .cancel {
+    background-color: #6c757d; /* 취소 버튼 색상 */
+    border-color: #6c757d;
+}
+
+.form-actions .cancel:hover {
+    background-color: #5a6268; /* 취소 버튼 호버 색상 */
+    border-color: #5a6268;
+}

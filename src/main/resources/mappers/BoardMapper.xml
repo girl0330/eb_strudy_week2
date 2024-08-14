@@ -15,4 +15,29 @@
             bi.system_update_datetime
         FROM board_info bi
     </select>
+
+    <insert id="saveBoard" parameterType="com.sb.sbweek3.dto.BoardInfoDTO" useGeneratedKeys="true" keyProperty="boardId" keyColumn="boardId">
+        INSERT INTO board_info
+        (
+         category_id,
+         writer,
+         password,
+         title,
+         content,
+         view_count,
+         system_register_datetime,
+         system_update_datetime
+        )
+        VALUES
+            (
+            #{categoryId},
+            #{writer},
+            #{password},
+            #{title},
+            #{content},
+            #{viewCount},
+            now(),
+            now()
+            )
+    </insert>
 </mapper>
