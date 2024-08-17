@@ -18,23 +18,70 @@
     </sql>
 
     <insert id="saveAll" parameterType="list">
-        INSERT INTO file_info (
-            <include refid="fileColumns"/>
+        INSERT INTO /*FileMapper.saveAll*/
+        file_info (
+        <include refid="fileColumns"/>
         ) VALUES
         <foreach item="file" collection="list" separator=",">
-            (
-                #{file.fileId},
-                #{file.boardId},
-                #{file.originalFilename},
-                #{file.savedFilename},
-                #{file.filePath},
-                #{file.fileType},
-                #{file.fileSize},
-                0,
-                now(),
-                now(),
-                NULL
+            (#{file.fileId},
+            #{file.boardId},
+            #{file.originalFilename},
+            #{file.savedFilename},
+            #{file.filePath},
+            #{file.fileType},
+            #{file.fileSize},
+            0,
+            now(),
+            now(),
+            NULL
             )
         </foreach>
     </insert>
+
+    <select id="findFileIdByBoardId" resultType="int" parameterType="int">
+        select file_id
+            from file_info
+        where board_id = #{boardId}
+            order by file_id
+    </select>
+    <!-- 파일 리스트 조회 -->
+    <select id="findAllByBoardId" parameterType="int" resultType="com.sb.sbweek3.dto.FileInfoDTO">
+        SELECT /*FileMapper.findAllByBoardId*/
+            <include refid="fileColumns" />
+        FROM file_info
+        WHERE
+            delete_yn = 0
+                AND board_id = #{boardId}
+        ORDER BY file_id
+    </select>
+
+    <!-- 파일 리스트 조회 -->
+    <select id="findAllByIFileIds" parameterType="list" resultType="com.sb.sbweek3.dto.FileInfoDTO">
+        SELECT /*FileMapper.findAllByIds*/
+        <include refid="fileColumns" />
+        FROM file_info
+        WHERE
+            delete_yn = 0
+        AND file_id
+            IN
+                <foreach item="fileId" collection="list" open="(" separator="," close=")">
+                    #{fileId}
+                </foreach>
+        ORDER BY
+            file_id
+    </select>
+
+    <!-- 파일 삭제 -->
+    <delete id="deleteAllByFileIds" parameterType="list">
+        UPDATE  /*FileMapper.deleteAllByIds*/
+            file_info
+        SET
+            delete_yn = 1,
+            file_deleted_datetime = NOW()
+        WHERE file_id
+            IN
+                <foreach item="fileId" collection="list" open="(" separator="," close=")">
+                    #{fileId}
+                </foreach>
+    </delete>
 </mapper>

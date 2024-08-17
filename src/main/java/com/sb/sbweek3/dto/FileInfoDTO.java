@@ -1,13 +1,9 @@
 package com.sb.sbweek3.dto;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
-@Getter
-@Setter
-@ToString
+@Data
+@Builder
 public class FileInfoDTO {
     private int fileId; // 파일 ID
     private int boardId; // 게시글 번호
@@ -23,12 +19,4 @@ public class FileInfoDTO {
     private String fileDeletedDatetime; // 삭제일시
     */
 
-    @Builder
-    public FileInfoDTO(String originalFilename, String savedFilename, String filePath,String fileType, Long fileSize) {
-        this.originalFilename = originalFilename;
-        this.savedFilename = savedFilename;
-        this.filePath = filePath;
-        this.fileType = fileType;
-        this.fileSize = fileSize;
-    }
 }

@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sb.sbweek3.board.free.BoardMapper">
+
     <select id="getList" resultType="com.sb.sbweek3.dto.BoardInfoDTO">
-        SELECT
+        SELECT /*BoardMapper.getList*/
             bi.board_id,
             bi.category_id,
             (SELECT ci.category FROM category_info ci WHERE ci.category_id = bi.category_id)AS category_name,
@@ -16,8 +17,37 @@
         FROM board_info bi
     </select>
 
+    <select id="getBoardDataTotal" resultType="int">
+        SELECT COUNT(*) AS total_count
+        FROM board_info
+    </select>
+
+    <select id="getListBySearch" parameterType="com.sb.sbweek3.dto.SearchDTO" resultType="com.sb.sbweek3.dto.BoardInfoDTO">
+        SELECT
+        category_id,
+        writer,
+        password,
+        title,
+        content,
+        view_count,
+        system_register_datetime,
+        system_update_datetime
+        FROM board_info
+        <where>
+            <if test="categoryId != 0">  <!-- categoryId가 0이 아닐 때 조건 추가 -->
+                category_id = #{categoryId}
+            </if>
+            <if test="searchKeyword != null and !searchKeyword.isEmpty()">  <!-- 검색어가 null이 아니고 빈 문자열이 아닐 때 조건 추가 -->
+                AND title LIKE CONCAT('%', #{searchKeyword}, '%')
+            </if>
+            <if test="startDate != null and !startDate.isEmpty() and endDate != null and !endDate.isEmpty()">  <!-- 시작일과 종료일이 유효할 때 조건 추가 -->
+                AND system_register_datetime BETWEEN #{startDate} AND #{endDate}
+            </if>
+        </where>
+    </select>
+
     <insert id="saveBoard" parameterType="com.sb.sbweek3.dto.BoardInfoDTO" useGeneratedKeys="true" keyProperty="boardId" keyColumn="boardId">
-        INSERT INTO board_info
+        INSERT INTO board_info /*BoardMapper.saveBoard*/
         (
          category_id,
          writer,
@@ -40,4 +70,20 @@
             now()
             )
     </insert>
+
+    <select id="findById" parameterType="int" resultType="com.sb.sbweek3.dto.BoardInfoDTO">
+        select /*BoardMapper.findById*/
+            bi.board_id,
+            bi.category_id,
+            (SELECT ci.category FROM category_info ci WHERE ci.category_id = bi.category_id)AS category_name,
+            bi.writer,
+            bi.password,
+            bi.title,
+            bi.content,
+            bi.view_count,
+            bi.system_register_datetime,
+            bi.system_update_datetime
+        from board_info bi
+        where board_id = #{boardId}
+    </select>
 </mapper>
