@@ -50,6 +50,10 @@ dependencies {
     implementation 'javax.servlet.jsp:javax.servlet.jsp-api:2.3.3' // JSP API 의존성 (Spring Boot 2.x.x 버전과 호환)
     implementation 'javax.servlet:jstl:1.2' // JSTL API 의존성
     compileOnly 'org.apache.tomcat.embed:tomcat-embed-jasper'
+
+    //log4j설정
+    implementation 'org.bgee.log4jdbc-log4j2:log4jdbc-log4j2-jdbc4.1:1.16'
+
 }
 
 

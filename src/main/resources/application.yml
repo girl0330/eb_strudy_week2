@@ -3,10 +3,10 @@ spring:
     name: sbweek3
 
   datasource:
-    url: jdbc:mysql://localhost:3308/ebrainsoft_study
+    driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+    url: jdbc:log4jdbc:mysql://localhost:3308/ebrainsoft_study
     username: ebsoft
     password: ebsoft
-    driver-class-name: com.mysql.cj.jdbc.Driver
 
   mvc:
     view:
@@ -19,14 +19,21 @@ server:
       init-parameters:
         development: true
 
-# Mybatis
 mybatis:
-  # mapper location
+  # Mapper XML 파일의 위치
   mapper-locations: classpath:mappers/*.xml
-  # column name to camel case
+
+  # MyBatis 설정
   configuration:
     map-underscore-to-camel-case: true
     use-generated-keys: true
+
+# 로깅 설정
+logging:
+  level:
+    com.job.dashboard: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
 image:
   upload:
