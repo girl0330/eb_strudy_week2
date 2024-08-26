@@ -1,17 +1,21 @@
 package com.sb.sbweek3.board.free;
 
+
 import com.sb.sbweek3.category.CategoryServiceImpl;
+import com.sb.sbweek3.common.FileUtils;
 import com.sb.sbweek3.dto.BoardInfoDTO;
 import com.sb.sbweek3.dto.CategoryInfoDTO;
+import com.sb.sbweek3.dto.FileInfoDTO;
 import com.sb.sbweek3.dto.SearchDTO;
+import com.sb.sbweek3.file.FileServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,42 +26,41 @@ import java.util.Map;
 public class BoardController {
 
     private final BoardService boardService;
-    private final CategoryServiceImpl categoryService;
+    private final CategoryServiceImpl categoryServiceImpl;
+    private final FileServiceImpl fileServiceImpl;
+    private final FileUtils fileUtils;
 
     @GetMapping("/board-list")
     public String showList(Model model) {
-        List<CategoryInfoDTO> categoryList = categoryService.getCategoryList();
+        List<CategoryInfoDTO> categoryList = categoryServiceImpl.getCategoryList();
+        List<BoardInfoDTO> boardInfoList = boardService.getList();
+        int total = boardService.getListTotal();
 
-        Map<String, Object> map = boardService.getData();
-
-//        List<BoardInfoDTO> boardInfoList = boardService.getList();
-//        int total = boardService.getListTotal();
-
-        System.out.println("boardData 확인 :: "+map.get("boardData"));
-        System.out.println("boardDataTotal 확인 :: "+map.get("boardDataTotal"));
-
-        model.addAttribute("lists", map.get("boardData"));
-        model.addAttribute("total", map.get("boardDataTotal"));
+        model.addAttribute("lists", boardInfoList);
+        model.addAttribute("total", total);
         model.addAttribute("categoryLists",categoryList);
         return "board/list";
     }
 
+    //todo : 동적 리스트 total
     @ResponseBody
-    @GetMapping("/ajax/board-list.do")
-    public List<SearchDTO> getBoardList(
-            @RequestParam(value = "startDate", required = false) String startDate,
-            @RequestParam(value = "endDate", required = false) String endDate,
-            @RequestParam(value = "categoryId", required = false) int categoryId,
-            @RequestParam(value = "searchKeyword", required = false) String searchKeyword,
-            Model model) {
+    @GetMapping("/ajax/search/board-list.do") //todo: (ajax)페이지 이동을 시켜줌 returnView
+    public ResponseEntity<Map<String, Object>> getSearchBoardList(  //todo: dto로 만들어 사용
+                                                                    @RequestParam(value = "startDate", required = false) String startDate,
+                                                                    @RequestParam(value = "endDate", required = false) String endDate,
+                                                                    @RequestParam(value = "categoryId", required = false) int categoryId,
+                                                                    @RequestParam(value = "searchKeyword", required = false) String searchKeyword) {
 
         List<SearchDTO> searchLists = boardService.getListBySearch(startDate, endDate, categoryId, searchKeyword);
-        System.out.println("확인 :::  "+searchLists);
+        int searchListsTotal = boardService.getSearchListTotal(startDate, endDate, categoryId, searchKeyword);
 
-        int total = boardService.getListTotal();
-        model.addAttribute("total", total);
+        Map<String, Object> response = new HashMap<>();
+        response.put("searchLists", searchLists);
+        response.put("searchListsTotal", searchListsTotal);
+//        model.addAttribute("total", total);
+//        model.addAttribute("searchLists", searchLists);
 
-        return searchLists;
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/board-post-page")
@@ -65,34 +68,63 @@ public class BoardController {
         return "board/post";
     }
 
-    @PostMapping("/ajax/board-save.do") //todo : ResponseEntity
+    @ResponseBody
+    @PostMapping("/ajax/board-save.do")
     public Map<String, String> ajaxSaveBoard(BoardInfoDTO boardInfoDTO) {
+        System.out.println("보드 확인 : "+boardInfoDTO);
         return boardService.saveBoard(boardInfoDTO);
     }
 
     //todo : @PathVariable과 @RequestParam(쿼리 스트링으로 받음 -> 가변적일 때 )의 차이점
 
-    @GetMapping("/board")
-    public String postDetail() {
-        return "board/detail";
-    }
-
     @GetMapping("/board-detail-page")
     public String detailPage(@RequestParam("boardId") int boardId, Model model) {
-        Map<String, Object> map = boardService.getDetailById(boardId);
-        System.out.println("디테일 화면 확인 : "+map.get("detail"));
-        model.addAttribute("detail", map.get("detail"));
-        model.addAttribute("files", map.get("files"));
-        return "board/detail";
+        BoardInfoDTO boardDetail = boardService.getDetailByBoardId(boardId);
+        model.addAttribute("detail", boardDetail);
+        return "board/detail"; //todo : ResponseEntity
     }
     @GetMapping("/board-update-page")
-    public String updatePage() {
-        return null;
+    public String updatePage(@RequestParam("boardId") int boardId, Model model) {
+        BoardInfoDTO boardDetail = boardService.getDetailByBoardId(boardId);
+        System.out.println("boardDetail     : " +boardDetail );
+
+        List<FileInfoDTO> files = fileServiceImpl.findFileIdByBoardId(boardId);
+        System.out.println("files      : "+files);
+        model.addAttribute("detail", boardDetail);
+        model.addAttribute("fileInfo",files);
+        return "board/update";
     }
 
-    @PostMapping("/ajax/board-update")
-    public String ajaxBoardUpdate() {
-        return null;
+    @PostMapping("/ajax/{boardId}/board-update.do")
+    @ResponseBody
+    public ResponseEntity<?> ajaxUpdateBoard(
+            @PathVariable int boardId,
+            @RequestParam(value = "deleteFileIds[]", required = false) List<Integer> deleteFileIds,
+            @RequestParam(value = "files", required = false) List<MultipartFile> files,
+            BoardInfoDTO boardInfoDTO) {
+        System.out.println("엡데이트?");
+        System.out.println("업뎃할 보드 아이디" + boardId);
+        System.out.println("삭제할 파일 이이디 :    "+deleteFileIds);
+        System.out.println("새로 등록할 파일 이이디 :    "+files);
+        System.out.println("수정된 보드 내용 : "+ boardInfoDTO);
+
+        //새로운 파일 저장
+        if (files != null && !files.isEmpty()) {
+            fileServiceImpl.saveFiles(boardId, files);
+        }
+
+        if (deleteFileIds != null && !deleteFileIds.isEmpty()) {
+            // 삭제할 파일 조회
+            List<FileInfoDTO> deleteFiles = fileServiceImpl.findAllFileByIds(deleteFileIds);
+            // 파일 삭제 (from disk)
+            fileUtils.deleteFiles(deleteFiles);
+            // 파일 삭제 (from database)
+            fileServiceImpl.deleteAllFileByIds(deleteFileIds);
+        }
+        //게시글 내용 수정 todo: 부분적으로 수정하고 있는데 (게시글 제목, 내용만) 수정하지 못하게한 부분도 전부 받아와서 update해줘야 하나?
+        Map<String, String> response = boardService.updateBoard(boardInfoDTO);
+
+        return ResponseEntity.ok(response);
     }
 
 }

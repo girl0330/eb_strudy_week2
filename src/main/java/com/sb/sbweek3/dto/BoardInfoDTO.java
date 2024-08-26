@@ -24,4 +24,11 @@ public class BoardInfoDTO {
     private String systemUpdateDatetime; // 수정일시
 
     private List<MultipartFile> files = new ArrayList<>(); // 첨부파일 List
+    private List<Integer> deleteFileIds = new ArrayList<>(); // 삭제할 첨부파일 fileId List
+//    private int file_id;
+//    private String original_filename;
+//    private String saved_filename;
+//    private String file_path;
+//    private String file_type;
+//    private int file_size;
 }

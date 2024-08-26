@@ -10,11 +10,15 @@ import java.util.List;
 public interface BoardMapper {
     List<BoardInfoDTO> getList ();
 
+    int getBoardDataTotal();
+
+    int getSearchListTotal(String startDate, String endDate, int categoryId, String searchKeyword);
+
     List<SearchDTO> getListBySearch(SearchDTO searchDTO);
 
     int saveBoard(BoardInfoDTO boardInfoDTO);
 
-    BoardInfoDTO findById(int boardId);
+    BoardInfoDTO getDetailByBoardId(int boardId);
 
-    int getBoardDataTotal();
+    void updateBoard(BoardInfoDTO boardInfoDTO);
 }

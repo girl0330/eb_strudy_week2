@@ -9,13 +9,15 @@ import java.util.Map;
 public interface BoardService {
     List<BoardInfoDTO> getList();
 
+    int getListTotal();
+
+    int getSearchListTotal(String startDate, String endDate, int categoryId, String searchKeyword);
+
     List<SearchDTO> getListBySearch(String startDate, String endDate, int categoryId, String searchKeyword);
 
     Map<String, String> saveBoard(BoardInfoDTO boardInfoDTO);
 
-    Map<String, Object> getDetailById(int boardId);
+    BoardInfoDTO getDetailByBoardId(int boardId);
 
-    Map<String, Object> getData();
-
-    int getListTotal();
+    Map<String, String> updateBoard(BoardInfoDTO boardInfoDTO);
 }

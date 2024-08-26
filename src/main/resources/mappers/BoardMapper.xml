@@ -22,26 +22,43 @@
         FROM board_info
     </select>
 
-    <select id="getListBySearch" parameterType="com.sb.sbweek3.dto.SearchDTO" resultType="com.sb.sbweek3.dto.BoardInfoDTO">
-        SELECT
-        category_id,
-        writer,
-        password,
-        title,
-        content,
-        view_count,
-        system_register_datetime,
-        system_update_datetime
-        FROM board_info
+    <select id="getSearchListTotal" parameterType="com.sb.sbweek3.dto.SearchDTO" resultType="int">
+    SELECT COUNT(*) AS total_count
+    FROM board_info
         <where>
-            <if test="categoryId != 0">  <!-- categoryId가 0이 아닐 때 조건 추가 -->
+            <if test="categoryId != 0">
                 category_id = #{categoryId}
             </if>
-            <if test="searchKeyword != null and !searchKeyword.isEmpty()">  <!-- 검색어가 null이 아니고 빈 문자열이 아닐 때 조건 추가 -->
+            <if test="searchKeyword != null and !searchKeyword.isEmpty()">
                 AND title LIKE CONCAT('%', #{searchKeyword}, '%')
             </if>
-            <if test="startDate != null and !startDate.isEmpty() and endDate != null and !endDate.isEmpty()">  <!-- 시작일과 종료일이 유효할 때 조건 추가 -->
+            <if test="startDate != null and !startDate.isEmpty() and endDate != null and !endDate.isEmpty()">
                 AND system_register_datetime BETWEEN #{startDate} AND #{endDate}
+            </if>
+        </where>
+    </select>
+
+    <select id="getListBySearch" parameterType="com.sb.sbweek3.dto.SearchDTO" resultType="com.sb.sbweek3.dto.BoardInfoDTO">
+        SELECT
+        bi.category_id,
+        (SELECT ci.category FROM category_info ci WHERE ci.category_id = bi.category_id) AS category_name,
+        bi.writer,
+        bi.password,
+        bi.title,
+        bi.content,
+        bi.view_count,
+        bi.system_register_datetime,
+        bi.system_update_datetime
+        FROM board_info bi
+        <where>
+            <if test="categoryId != 0">
+                bi.category_id = #{categoryId}
+            </if>
+            <if test="searchKeyword != null and !searchKeyword.isEmpty()">
+                AND bi.title LIKE CONCAT('%', #{searchKeyword}, '%')
+            </if>
+            <if test="startDate != null and !startDate.isEmpty() and endDate != null and !endDate.isEmpty()">
+                AND bi.system_register_datetime BETWEEN #{startDate} AND #{endDate}
             </if>
         </where>
     </select>
@@ -71,8 +88,8 @@
             )
     </insert>
 
-    <select id="findById" parameterType="int" resultType="com.sb.sbweek3.dto.BoardInfoDTO">
-        select /*BoardMapper.findById*/
+    <select id="getDetailByBoardId" parameterType="int" resultType="com.sb.sbweek3.dto.BoardInfoDTO">
+        select /*BoardMapper.getDetailByBoardId*/
             bi.board_id,
             bi.category_id,
             (SELECT ci.category FROM category_info ci WHERE ci.category_id = bi.category_id)AS category_name,
@@ -86,4 +103,14 @@
         from board_info bi
         where board_id = #{boardId}
     </select>
+
+    <update id="updateBoard" parameterType="com.sb.sbweek3.dto.BoardInfoDTO">
+        UPDATE board_info
+        SET
+            title = #{title},
+            content = #{content},
+            view_count = #{viewCount},
+            system_update_datetime = now()
+        WHERE board_id = #{boardId}
+    </update>
 </mapper>

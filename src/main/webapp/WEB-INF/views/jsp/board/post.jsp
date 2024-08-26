@@ -13,7 +13,6 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     function selectFile(element) {
-
         const file = element.files[0];
         const filename = element.closest('.file_input').firstElementChild;
 
@@ -66,22 +65,8 @@
 
     let boardSave = {
         init: function () {
-            //공백 검사
-            // if (!this.emptyCheck()) {
-            //     return;
-            // }
-            // //유효성 검사
-            // if (!this.validationCheck()) {
-            //     return;
-            // }
             this.formSubmit();
         },
-
-        // //공백 검사
-        // emptyCheck: function () {},
-        //
-        // //유효성 검사
-        // validationCheck: function () {},
 
         //전송 함수 정의
         formSubmit: function () {
@@ -100,11 +85,18 @@
                 contentType: false,  // Content-Type 헤더 설정을 방지 (FormData 사용 시 필요)
                 success: function(response) {
                     console.log('파일 업로드 성공:', response);
-                    // 파일 업로드 성공 시 추가 작업
+                    if (response.code === "success") {
+                        alert(response.message);
+                        location.href="/board-list";
+                    }
                 },
-                error: function(error) {
-                    console.error('파일 업로드 실패:', error);
-                    // 파일 업로드 실패 시 추가 작업
+                error: function(xhr, status, error) {
+                    // 서버에서 받은 JSON 오류 응답 처리
+                    let errorMessage = xhr.responseJSON ? xhr.responseJSON.message : "알 수 없는 오류가 발생했습니다.";
+                    console.error('파일 업로드 실패:', errorMessage);
+
+                    // 사용자에게 오류 메시지 표시
+                    alert("오류 발생: " + errorMessage);
                 }
             });
 
@@ -128,7 +120,7 @@
                 <td class="label">카테고리 *</td>
                 <td class="input-field">
                     <select id="categoryId" name="categoryId" value="" data-name="카테고리">
-                        <option value="">카테고리 선택</option>
+                        <option value="0">카테고리 선택</option>
                         <option value="1">Java</option>
                         <option value="3">Python</option>
                         <option value="4">JavaScript</option>
@@ -192,33 +184,13 @@
                     </div>
                 </td>
             </tr>
-
-<%--            <tr>--%>
-<%--                <td class="label">파일 첨부</td>--%>
-<%--                <td class="input-field">--%>
-<%--                    <div class="file-input">--%>
-<%--                        <input type="text" id="file-name1" placeholder="파일을 선택해주세요" readonly>--%>
-<%--                        <input type="file" id="file1" name="file" class="custom-file-input" onchange="document.getElementById('file-name1').value = this.files[0].name">--%>
-<%--                        <label for="file1">파일 찾기</label>--%>
-<%--                    </div>--%>
-<%--                    <div class="file-input">--%>
-<%--                        <input type="text" id="file-name2" placeholder="파일을 선택해주세요" readonly>--%>
-<%--                        <input type="file" id="file2" name="file" class="custom-file-input" onchange="document.getElementById('file-name2').value = this.files[0].name">--%>
-<%--                        <label for="file2">파일 찾기</label>--%>
-<%--                    </div>--%>
-<%--                    <div class="file-input">--%>
-<%--                        <input type="text" id="file-name3" placeholder="파일을 선택해주세요" readonly>--%>
-<%--                        <input type="file" id="file3" name="file" class="custom-file-input" onchange="document.getElementById('file-name3').value = this.files[0].name">--%>
-<%--                        <label for="file3">파일 찾기</label>--%>
-<%--                    </div>--%>
-<%--                </td>--%>
-<%--            </tr>--%>
         </table>
     </form>
     <tr>
         <td colspan="2">
             <div class="form-actions">
                 <a href="#" class="button cancel" id="cancel-button">취소</a>
+                <a href="/board-list" class="button" id="go-list-button">목록</a>
                 <a href="#" class="button" id="save-button">저장</a>
             </div>
         </td>

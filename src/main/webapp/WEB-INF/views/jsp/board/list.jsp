@@ -10,75 +10,178 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/board-list.css">
 </head>
 <body>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    const keywordSearch = {
+        init : function () {
+            this.keywordSearchSubmit();
+        },
+
+        keywordSearchSubmit: function () {
+            const formData = $("#searchForm").serialize();
+
+            $.ajax({
+                url: '/ajax/search/board-list.do',  // 서버의 엔드포인트 URL
+                type: 'GET',
+                data: formData,
+                success: (response) => {
+                    console.log("검색 결과 리스트:"+JSON.stringify(response));
+                    keywordSearch.renderSearchList(response);
+                },
+                error: function(xhr, status, error) {
+                    // 서버에서 받은 JSON 오류 응답 처리
+                    let errorMessage = xhr.responseJSON ? xhr.responseJSON.message : "알 수 없는 오류가 발생했습니다.";
+                    console.error('파일 업로드 실패:', errorMessage);
+
+                    // 사용자에게 오류 메시지 표시
+                    alert("오류 발생: " + errorMessage);
+                }
+            });
+        },
+
+        renderSearchList: function (response) {
+            const searchListsTotal = response.searchListsTotal;
+            const searchLists = response.searchLists;
+            const container = $("#listArea");
+            container.empty();
+
+            let searchListHtml =
+                `<div id="info-bar">` +
+                `<span id="total-count">총` + searchListsTotal + `건</span>` +
+                `<a href="/board-post-page" class="btn">글 작성하기</a>` +
+                `</div>` +
+                `<table id="data-table">` +
+                `<thead>` +
+                `<tr>` +
+                `<th>카테고리</th>` +
+                `<th>작성자</th>` +
+                `<th>제목</th>` +
+                `<th>조회수</th>` +
+                `<th>작성일</th>` +
+                `<th>수정일</th>` +
+                `</tr>` +
+                `</thead>` +
+                `<tbody>`;
+
+            searchLists.forEach(item => {
+                searchListHtml +=
+                    `<tr>` +
+                        `<td>` + item.categoryName + `</td>` +
+                        `<td>` + item.writer + `</td>` +
+                        `<td><a href="/board-detail-page?boardId= + item.boardId + ">` + item.title + `</a></td>` +
+                        `<td>` + item.viewCount + `</td>` +
+                        `<td>` + item.systemRegisterDatetime + `</td>` +
+                        `<td>` + item.systemUpdateDatetime + `</td>` +
+                    `</tr>`;
+            });
+
+            searchListHtml +=
+                `</tbody>` +
+                `</table>`;
+
+            container.append(searchListHtml);
+        }
+    };
+
+    $(document).ready(function() {
+        $('#searchButton').on('click', function (e) {
+            alert("???")
+            e.preventDefault();
+            keywordSearch.init();
+        });
+    });
+</script>
 <div id="wrap">
     <h2>게시글 리스트</h2>
 
     <!-- 검색 영역 -->
     <div id="search-box" style="border: 1px solid black; padding: 10px; margin-bottom: 20px;">
-        <form action="BoardServlet" method="get">
-            <input type="hidden" name="command" value="board_list">
+        <form id="searchForm" name="searchForm">
 
             <!-- 등록일 필터 -->
             <label for="startDate">등록일: </label>
-            <input type="text" id="startDate" name="startDate" placeholder="시작일">
+            <input type="text" id="startDate" name="startDate" placeholder="시작일" data-valid="true">
             <span>~</span>
-            <input type="text" id="endDate" name="endDate" placeholder="종료일">
+            <input type="text" id="endDate" name="endDate" placeholder="종료일" data-valid="true">
 
             <!-- 카테고리 필터 -->
-            <label for="category"></label>
-            <select id="category" name="category">
-                <option value="">전체 카테고리</option>
-                <option value="1">카테고리 1</option>
-                <option value="2">카테고리 2</option>
-                <!-- 다른 카테고리 옵션 추가 가능 -->
+            <label for="categoryId"></label>
+            <select id="categoryId" name="categoryId" data-valid="true">
+                <option value="0">카테고리 선택</option>
+                <!-- categoryLists를 반복하여 옵션을 생성 -->
+                <c:forEach var="categoryList" items="${categoryLists}">
+                    <option value="${categoryList.categoryId}">${categoryList.category}</option>
+                </c:forEach>
             </select>
 
             <!-- 검색어 입력 -->
             <label for="searchKeyword"></label>
-            <input type="text" id="searchKeyword" name="searchKeyword" placeholder="검색어 입력">
-            <button type="submit">검색</button>
+            <input type="text" id="searchKeyword" name="searchKeyword" placeholder="검색어 입력" data-valid="true">
+            <button type="button" id="searchButton">검색</button>
+
+<%--            <select id="searchType" name="searchType" title="검색 유형 선택">--%>
+<%--                <option value="">전체 검색</option>--%>
+<%--                <option value="title">제목</option>--%>
+<%--                <option value="content">내용</option>--%>
+<%--                <option value="writer">작성자</option>--%>
+<%--            </select>--%>
+
+<%--            <input type="text" id="searchKeyword" name="searchKeyword" placeholder="검색어 입력" data-valid="true">--%>
+
+<%--            <button type="button" id="searchButton">검색</button>--%>
         </form>
     </div>
 
-    <!-- 총 개수 및 글 작성 버튼 영역 -->
-    <div id="info-bar">
-        <span id="total-count">총 - 건</span>
-        <a href="/post" class="btn">글 작성하기</a>
-    </div>
+    <div id="listArea" class="listArea">
+        <!-- 총 개수 및 글 작성 버튼 영역 -->
+        <div id="info-bar">
+            <span id="total-count">총 ${total} 건</span>
+            <a href="/board-post-page" class="btn">글 작성하기</a>
+        </div>
 
-    <table>
-        <tr>
-            <th>카테고리</th>
-            <th>작성자</th>
-            <th>제목</th>
-            <th>조회수</th>
-            <th>작성일</th>
-            <th>수정일</th>
-        </tr>
-        <c:forEach var="list" items="${lists}">
+        <table id="data-table">
+            <thead>
             <tr>
-                <td>${list.categoryName }</td>
-                <td>${list.writer }</td>
-                <td>${list.title }</td>
-                <td>${list.viewCount }</td>
-                <td>${list.systemRegisterDatetime }</td>
-                <td>${list.systemUpdateDatetime }</td>
+                <th>카테고리</th>
+                <th>작성자</th>
+                <th>제목</th>
+                <th>조회수</th>
+                <th>작성일</th>
+                <th>수정일</th>
             </tr>
-        </c:forEach>
-    </table>
+            </thead>
+            <tbody>
+            <!-- 데이터가 여기에 삽입됩니다 -->
+            <c:forEach var="list" items="${lists}">
+                <tr>
+                    <td>${list.categoryName}</td>
+                    <td>${list.writer}</td>
+                    <td><a href="/board-detail-page?boardId=${list.boardId}">
+                            ${list.title}
+                    </a></td>
+                    <td>${list.viewCount}</td>
+                    <td>${list.systemRegisterDatetime}</td>
+                    <td>${list.systemUpdateDatetime}</td>
+                </tr>
+            </c:forEach>
+            </tbody>
+        </table>
+    </div>
     <div id="pagination">
-        <a href="?page=prev" class="page-link">이전</a>
-        <a href="?page=1" class="page-link">1</a>
-        <a href="?page=2" class="page-link">2</a>
-        <a href="?page=3" class="page-link">3</a>
-        <a href="?page=4" class="page-link">4</a>
-        <a href="?page=5" class="page-link">5</a>
-        <a href="?page=6" class="page-link">6</a>
-        <a href="?page=7" class="page-link">7</a>
-        <a href="?page=8" class="page-link">8</a>
-        <a href="?page=9" class="page-link">9</a>
-        <a href="?page=10" class="page-link">10</a>
-        <a href="?page=next" class="page-link">다음</a>
+        <!-- 이전 페이지 링크 -->
+        <c:if test="${pageInfoDTO.currentPage > 1}">
+            <a href="?page=${pageInfoDTO.previousPage}" class="page-link">이전</a>
+        </c:if>
+
+        <!-- 페이지 번호 링크 -->
+        <c:forEach var="i" begin="${pageInfoDTO.startPageIndex}" end="${pageInfoDTO.endPageIndex}">
+            <a href="?page=${i}" class="page-link ${pageInfoDTO.currentPage == i ? 'active' : ''}">${i}</a>
+        </c:forEach>
+
+        <!-- 다음 페이지 링크 -->
+        <c:if test="${pageInfoDTO.currentPage < pageInfoDTO.pageTotal}">
+            <a href="?page=${pageInfoDTO.nextPage}" class="page-link">다음</a>
+        </c:if>
     </div>
 </div>
 </body>
