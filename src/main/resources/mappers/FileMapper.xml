@@ -17,7 +17,7 @@
         file_deleted_datetime
     </sql>
 
-    <insert id="saveAll" parameterType="list">
+    <insert id="saveFiles" parameterType="list">
         INSERT INTO /*FileMapper.saveAll*/
         file_info (
         <include refid="fileColumns"/>
@@ -30,7 +30,7 @@
             #{file.filePath},
             #{file.fileType},
             #{file.fileSize},
-            0,
+            'n' ,
             now(),
             now(),
             NULL
@@ -39,7 +39,8 @@
     </insert>
 
     <select id="findFileIdByBoardId" resultType="int" parameterType="int">
-        select file_id
+        select /*FileMapper.findFileIdByBoardId*/
+            file_id
             from file_info
         where board_id = #{boardId}
             order by file_id
@@ -50,18 +51,18 @@
             <include refid="fileColumns" />
         FROM file_info
         WHERE
-            delete_yn = 0
+            delete_yn = 'n'
                 AND board_id = #{boardId}
         ORDER BY file_id
     </select>
 
     <!-- 파일 리스트 조회 -->
     <select id="findAllByIFileIds" parameterType="list" resultType="com.sb.sbweek3.dto.FileInfoDTO">
-        SELECT /*FileMapper.findAllByIds*/
+        SELECT /*FileMapper.findAllByIFileIds*/
         <include refid="fileColumns" />
         FROM file_info
         WHERE
-            delete_yn = 0
+            delete_yn = 'n'
         AND file_id
             IN
                 <foreach item="fileId" collection="list" open="(" separator="," close=")">
@@ -71,17 +72,39 @@
             file_id
     </select>
 
-    <!-- 파일 삭제 -->
-    <delete id="deleteAllByFileIds" parameterType="list">
-        UPDATE  /*FileMapper.deleteAllByIds*/
+    <select id="findAllFileByIds" parameterType="list" resultType="com.sb.sbweek3.dto.FileInfoDTO">
+        SELECT /*FileMapper.findAllFileByIds*/
+        <include refid="fileColumns" />
+        FROM
+            file_info fi
+        WHERE
+            file_id
+        IN
+        <foreach item="fileId" collection="list" open="(" separator="," close=")">
+            #{fileId}
+        </foreach>
+    </select>
+
+    <update id="deleteAllByFileIds" parameterType="list">
+        UPDATE /*FileMapper.deleteAllByFileIds*/
             file_info
         SET
-            delete_yn = 1,
-            file_deleted_datetime = NOW()
+            delete_yn = "y",
+            file_deleted_datetime = now()
         WHERE file_id
-            IN
-                <foreach item="fileId" collection="list" open="(" separator="," close=")">
-                    #{fileId}
-                </foreach>
-    </delete>
+        IN
+        <foreach item="fileId" collection="list" open="(" separator="," close=")">
+            #{fileId}
+        </foreach>
+    </update>
+
+    <select id="findFileByFileId" parameterType="int" resultType="com.sb.sbweek3.dto.FileInfoDTO">
+        SELECT /*FileMapper.findFileByFileId*/
+            <include refid="fileColumns" />
+        FROM
+            file_info fi
+        WHERE
+            file_id = #{fileId}
+    </select>
+
 </mapper>

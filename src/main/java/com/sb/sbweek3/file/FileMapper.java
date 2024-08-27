@@ -8,7 +8,7 @@ import java.util.List;
 @Mapper
 public interface FileMapper {
 
-    void saveAll(List<FileInfoDTO> files);
+    void saveFiles(List<FileInfoDTO> files);
 
     List<FileInfoDTO> findFileIdByBoardId(int boardId);
 
@@ -21,15 +21,15 @@ public interface FileMapper {
 
     /**
      * 파일 리스트 조회
-     * @param fileId - PK 리스트
+     * @param fileIds - PK 리스트
      * @return 파일 리스트
      */
     //todo : 제네릭타입에 원시타입을 사용할 수 없어서 mapper타입으로 사용했는데 통일성을 위해서 모두 integer로 바꿔줘야 하나?
-    List<FileInfoDTO> findAllByIFileIds(List<FileInfoDTO> fileId);
+    List<FileInfoDTO> findAllByIFileIds(List<FileInfoDTO> fileIds);
 
-    /**
-     * 파일 삭제
-     * @param fileId - PK 리스트
-     */
-    void deleteAllByFileIds(List<Integer> fileId);
+    List<FileInfoDTO> findAllFileByIds(List<Integer> deleteFileIds);
+
+    void deleteAllByFileIds(List<Integer> deleteFileIds);
+
+    FileInfoDTO findFileByFileId(int fileId);
 }

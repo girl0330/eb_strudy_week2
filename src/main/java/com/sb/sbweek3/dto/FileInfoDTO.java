@@ -12,11 +12,10 @@ public class FileInfoDTO {
     private String filePath; // 파일 경로
     private String fileType; // 파일 유형
     private long fileSize; // 파일 크기
-    /**
+
     private boolean deleteYn; // 저장된 파일 삭제여부
     private String systemRegisterDatetime; // 작성일시
     private String systemUpdateDatetime; // 수정일시
     private String fileDeletedDatetime; // 삭제일시
-    */
 
 }

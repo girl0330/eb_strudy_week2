@@ -1,10 +1,12 @@
 package com.sb.sbweek3.file;
 
+import com.sb.sbweek3.common.FileUtils;
 import com.sb.sbweek3.dto.FileInfoDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collections;
 import java.util.List;
@@ -14,61 +16,64 @@ import java.util.List;
 public class FileServiceImpl {
 
     private final FileMapper fileMapper;
+    private final FileUtils fileUtils;
 
+    /**
+     * 파일 저장
+     * @param boardId - 파일 저장할 게시글 번호 pk
+     * @param multiFiles - 파일
+     */
     @Transactional
-    public void saveFiles(final int boardId, final List<FileInfoDTO> files) {
-        System.out.println("boardId 확인 : "+boardId);
+    public void saveFiles(int boardId, List<MultipartFile> multiFiles) {
+        List<FileInfoDTO> files = fileUtils.uploadFiles(multiFiles);
+
         if (CollectionUtils.isEmpty(files)) {
             return;
         }
         for (FileInfoDTO file : files) {
             file.setBoardId(boardId);
         }
-        fileMapper.saveAll(files);
+
+        System.out.println("filesSize확인 : "+ files);
+        fileMapper.saveFiles(files);
     }
 
     public List<FileInfoDTO> findFileIdByBoardId(int boardId) {
         List<FileInfoDTO> fileIds = fileMapper.findFileIdByBoardId(boardId);
         System.out.println("filesIds 길이는? "+fileIds.size());
-        if (fileIds.size() > 1) { //다중 파일
-            return findAllFileByFileIds(fileIds);
+        if (fileIds.size() >= 2) { //다중 파일
+            if (CollectionUtils.isEmpty(fileIds)) {
+                return Collections.emptyList();
+            }
+            return fileMapper.findAllByIFileIds(fileIds);
         } else {
-            return findAllFileByBoardId(boardId);
+            return fileMapper.findAllByBoardId(boardId);
         }
     }
 
     /**
-     * 파일 리스트 조회
-     * @param boardId - 게시글 번호 (FK)
-     * @return 파일 리스트
+     *
+     * @param boardId - 삭제 파일 찾을 보드ID
+     * @return 삭제할 파일 정보
      */
-    public List<FileInfoDTO> findAllFileByBoardId(final int boardId) {
-        System.out.println("단일 파일 확인 ::  "+boardId);
-        return fileMapper.findAllByBoardId(boardId);
+    public List<FileInfoDTO> findAllFileByIds(List<Integer> deleteFileIds) {
+        return fileMapper.findAllFileByIds(deleteFileIds);
     }
 
-    /**
-     * 파일 리스트 조회
-     * @param fileId - PK 리스트
-     * @return 파일 리스트
-     */
-    public List<FileInfoDTO> findAllFileByFileIds(final List<FileInfoDTO> fileId) {
-        System.out.println("다중파일 :: " + fileId);
-        if (CollectionUtils.isEmpty(fileId)) {
-            return Collections.emptyList();
-        }
-        return fileMapper.findAllByIFileIds(fileId);
-    }
 
     /**
      * 파일 삭제 (from Database)
-     * @param fileId - PK 리스트
+     * @param deleteFileIds - fileInfo의 pk
      */
     @Transactional
-    public void deleteAllFileByIds(final List<Integer> fileId) {
-        if (CollectionUtils.isEmpty(fileId)) {
+    public void deleteAllFileByIds(List<Integer> deleteFileIds) {
+        if (CollectionUtils.isEmpty(deleteFileIds)) {
             return;
         }
-        fileMapper.deleteAllByFileIds(fileId);
+        fileMapper.deleteAllByFileIds(deleteFileIds);
+    }
+
+    public FileInfoDTO findFileByFileId(int fileId) {
+        return fileMapper.findFileByFileId(fileId);
     }
 }
