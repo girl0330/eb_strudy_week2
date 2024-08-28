@@ -1,6 +1,7 @@
 package com.sb.sbweek3.board.free;
 
 import com.sb.sbweek3.dto.BoardInfoDTO;
+import com.sb.sbweek3.dto.PageInfoDTO;
 import com.sb.sbweek3.dto.SearchDTO;
 
 import java.util.List;
@@ -19,5 +20,10 @@ public interface BoardService {
 
     BoardInfoDTO getDetailByBoardId(int boardId);
 
+
     Map<String, String> updateBoard(BoardInfoDTO boardInfoDTO);
+
+    List<BoardInfoDTO> getBoardList(int page);
+
+    PageInfoDTO pagingParam(int page);
 }

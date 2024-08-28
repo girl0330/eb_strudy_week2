@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sb.sbweek3.comment.CommentMapper">
+    <insert id="saveComment" parameterType="com.sb.sbweek3.dto.CommentInfoDTO">
+        INSERT INTO /*CommentMapper.saveComment*/
+            comment_info
+            (
+                board_id,
+                comment_content,
+                system_register_datetime
+            )
+        VALUES
+            (
+                #{boardId},
+                #{commentContent},
+                now()
+            )
+    </insert>
+
+    <select id="getCommentListByBoardId" parameterType="int" resultType="com.sb.sbweek3.dto.CommentInfoDTO">
+        SELECT /*CommentMapper.getCommentListByBoardId*/
+            comment_id,
+            board_id,
+            comment_content,
+            system_register_datetime
+        FROM
+            comment_info
+        WHERE
+            board_id = #{boardId}
+        ORDER BY system_register_datetime DESC
+    </select>
+
+    <select id="getDetailByBoardId" parameterType="int" resultType="com.sb.sbweek3.dto.CommentInfoDTO">
+        SELECT /*CommentMapper.getDetailByBoardId*/
+            comment_id,
+            board_id,
+            comment_content,
+            system_register_datetime
+        FROM
+            comment_info
+        WHERE
+            board_id = #{boardId}
+        ORDER BY system_register_datetime DESC
+    </select>
+</mapper>

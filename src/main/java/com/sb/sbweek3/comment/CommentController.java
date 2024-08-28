@@ -1,0 +1,26 @@
+package com.sb.sbweek3.comment;
+
+import com.sb.sbweek3.dto.CommentInfoDTO;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.List;
+
+@Controller
+@RequiredArgsConstructor
+public class CommentController {
+    private final CommentService commentService;
+
+    @PostMapping("/comment/save")
+    @ResponseBody
+    public List<CommentInfoDTO> saveComment(@ModelAttribute CommentInfoDTO commentInfoDTO) { //댓글 내용, 보드Id
+        System.out.println("commentInfoDTO = " + commentInfoDTO);
+        commentService.saveComment(commentInfoDTO);
+        List<CommentInfoDTO> commentList = commentService.getCommentListByBoardId(commentInfoDTO.getBoardId());
+        return commentList;
+    }
+
+}

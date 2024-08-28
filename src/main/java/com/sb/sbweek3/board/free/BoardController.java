@@ -2,11 +2,9 @@ package com.sb.sbweek3.board.free;
 
 
 import com.sb.sbweek3.category.CategoryServiceImpl;
+import com.sb.sbweek3.comment.CommentService;
 import com.sb.sbweek3.common.FileUtils;
-import com.sb.sbweek3.dto.BoardInfoDTO;
-import com.sb.sbweek3.dto.CategoryInfoDTO;
-import com.sb.sbweek3.dto.FileInfoDTO;
-import com.sb.sbweek3.dto.SearchDTO;
+import com.sb.sbweek3.dto.*;
 import com.sb.sbweek3.file.FileServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,19 +24,23 @@ import java.util.Map;
 public class BoardController {
 
     private final BoardService boardService;
+    private final CommentService commentService;
     private final CategoryServiceImpl categoryServiceImpl;
     private final FileServiceImpl fileServiceImpl;
     private final FileUtils fileUtils;
 
-    @GetMapping("/board-list")
-    public String showList(Model model) {
+    @GetMapping("/board/paging")
+    public String showPagingList(Model model, @RequestParam(value = "page", required = false, defaultValue = "1") int page) {
+        System.out.println("page = " + page);
         List<CategoryInfoDTO> categoryList = categoryServiceImpl.getCategoryList();
-        List<BoardInfoDTO> boardInfoList = boardService.getList();
+        List<BoardInfoDTO> boardList = boardService.getBoardList(page);
+        PageInfoDTO pageInfoDTO = boardService.pagingParam(page);
         int total = boardService.getListTotal();
 
-        model.addAttribute("lists", boardInfoList);
+        model.addAttribute("list", boardList);
         model.addAttribute("total", total);
-        model.addAttribute("categoryLists",categoryList);
+        model.addAttribute("paging", pageInfoDTO);
+        model.addAttribute("category",categoryList);
         return "board/list";
     }
 
@@ -80,11 +82,14 @@ public class BoardController {
     @GetMapping("/board-detail-page")
     public String detailPage(@RequestParam("boardId") int boardId, Model model) {
         BoardInfoDTO boardDetail = boardService.getDetailByBoardId(boardId);
+        List<CommentInfoDTO> commentDetail = commentService.getDetailByBoardId(boardId);
+        System.out.println("commentService 확인 : "+commentDetail);
         model.addAttribute("detail", boardDetail);
+        model.addAttribute("comment", commentDetail);
         return "board/detail"; //todo : ResponseEntity
     }
     @GetMapping("/board-update-page")
-    public String updatePage(@RequestParam("boardId") int boardId, Model model) {
+    public String updatePage(@RequestParam("boardId") int boardId, @RequestParam(value = "page", required = false, defaultValue = "1") int page, Model model) {
         BoardInfoDTO boardDetail = boardService.getDetailByBoardId(boardId);
         System.out.println("boardDetail     : " +boardDetail );
 

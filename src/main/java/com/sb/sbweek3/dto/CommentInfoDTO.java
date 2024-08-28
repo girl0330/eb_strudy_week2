@@ -11,4 +11,5 @@ public class CommentInfoDTO {
     private int commentId; // 댓글 ID
     private int boardId; // 게시글 ID
     private String commentContent; // 댓글 내용
+    private String systemRegisterDatetime; // 작성 시간
 }

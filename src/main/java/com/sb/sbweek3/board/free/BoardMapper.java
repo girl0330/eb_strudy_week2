@@ -5,6 +5,8 @@ import com.sb.sbweek3.dto.SearchDTO;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
+import java.util.Map;
+
 //mybatisX 플러그인
 @Mapper
 public interface BoardMapper {
@@ -21,4 +23,6 @@ public interface BoardMapper {
     BoardInfoDTO getDetailByBoardId(int boardId);
 
     void updateBoard(BoardInfoDTO boardInfoDTO);
+
+    List<BoardInfoDTO> pagingList(Map<String, Integer> pagingParams);
 }

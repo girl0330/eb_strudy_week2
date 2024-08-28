@@ -2,6 +2,8 @@ package com.sb.sbweek3.board.free;
 
 import com.sb.sbweek3.common.FileUtils;
 import com.sb.sbweek3.dto.BoardInfoDTO;
+import com.sb.sbweek3.dto.CommentInfoDTO;
+import com.sb.sbweek3.dto.PageInfoDTO;
 import com.sb.sbweek3.dto.SearchDTO;
 import com.sb.sbweek3.exception.CustomException;
 import com.sb.sbweek3.exception.ExceptionErrorCode;
@@ -26,6 +28,44 @@ public class BoardServiceImpl implements BoardService{
     private final FileServiceImpl fileServiceImpl;
     private final FileMapper fileMapper;
 
+    int pageLimit = 12;
+    int blockLimit = 10;
+
+
+    public List<BoardInfoDTO> getBoardList(int page) {
+        /*
+        보여지는 item 수 : 12개
+        1 페이지 요청 : 0
+        2 페이지를 요청 : 12
+        3 페이지를 요청 : 24
+         */
+
+        int pagingStart = (page -1) * pageLimit;
+        Map<String, Integer> pagingParams = new HashMap<>();
+        pagingParams.put("start", pagingStart);
+        pagingParams.put("limit", pageLimit);
+        List<BoardInfoDTO> pagingList = boardMapper.pagingList(pagingParams);
+
+        return pagingList;
+    }
+
+    public PageInfoDTO pagingParam(int page) {
+        int boardTotal = boardMapper.getBoardDataTotal();
+        int maxPage = (int) (Math.ceil((double) boardTotal / pageLimit));
+        // 시자페이지 값 계산
+        int startPage = (int)(Math.ceil((double) page / blockLimit) -1 )  * blockLimit + 1;
+        int endPage = startPage + blockLimit -1 ;
+        if (endPage == startPage) {
+            endPage = maxPage;
+        }
+
+        return PageInfoDTO.builder()
+                          .page(page)
+                          .maxPage(maxPage)
+                          .startPage(startPage)
+                          .endPage(endPage)
+                          .build();
+    }
     public int getListTotal() {
         return boardMapper.getBoardDataTotal();
     }

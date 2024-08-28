@@ -14,8 +14,73 @@
 <script>
     $(document).ready(function() {
         findAllFile();
-
+        $("#comment-write-button").on("click", function () {
+            commentFunk.init();
+        })
     });
+
+    let commentFunk = {
+        init: function () {
+            //공백 검사
+            if (this.emptyCheck()) { //true이면 고백임.
+                alert("공백임!");
+                return;
+            }
+            // 댓글 작성
+            this.commentWrite();
+        },
+
+        // 공백 검사
+        emptyCheck: function () {
+            let valid = false;
+            let comment = $('#commentContent').val();
+            const removeBlank = comment.replace(/\s*/g, "");
+            if (removeBlank === "") {
+                let text = $('#commentContent').data('name');
+                alert(text + "이 비여있습니다.");
+                $('#commentContent').focus();
+                valid = true;
+            }
+            return valid;
+        },
+
+        // 댓글 작성 함수
+        commentWrite: function () {
+            alert("댓글 작성 함수 시작!")
+            const contents = $('#commentContent').val();
+            const boardId = '${detail.boardId}';
+
+            $.ajax({
+                type: "post",
+                url: "/comment/save",
+                data: {
+                    commentContent: contents,
+                    boardId: boardId
+                },
+                dataType: "json",
+                success: function (commentList) {
+                    document.getElementById("commentContent").value = null;
+                    const comments = commentList;
+                    const commentContainer = $("#commentList");
+                    commentContainer.empty();
+
+                    let commentHtml = '';
+                    comments.forEach(comment => {
+                        commentHtml +=
+                            `<div class="comment">` +
+                            `<p>` + comment.systemRegisterDatetime + `</p>` +
+                            `<p>` + comment.commentContent + `</p>` +
+                            `<hr className="divider"/>` +
+                            `</div>`;
+                    });
+                    commentContainer.append(commentHtml);
+                },
+                error: function () {
+                    console.log("작성 실패");
+                }
+            });
+        }
+    }
 
     // 전체 파일 조회
     function findAllFile() {
@@ -32,7 +97,6 @@
         });
     }
     function renderFileList (response) {
-        console.log("???" +JSON.stringify(response));
         const filesList = response;
         const container = $("#fileArea");
         container.empty();
@@ -48,6 +112,7 @@
                 `<a href="/ajax/files/` + file.fileId + `/download" class="" role="button" target="_blank" data-linktype="file" data-linkdata="-">` +
                 `<span class="se-blind">파일 다운로드</span>` +
                 `</a>` +
+                `<hr className="divider"/>` +
                 `</td>` +
                 `</tr>`;
         });
@@ -85,26 +150,32 @@
                     <!-- 여기에 동적으로 파일 리스트를 추가 -->
                     첨부파일 확인용
                 </td>
+                <hr class="divider" />
             </tr>
         </div>
     </div>
 
-    <div class="comments">
-        <div class="comment">2020.03.09 16:32 댓글이 출력됩니다.</div>
-        <div class="comment">2018.03.09 14:23 댓글이 출력됩니다. 댓글이 출력됩니다. 댓글이 출력됩니다.</div>
+    <div class="comment-list" id="commentList">
+        <!-- 여기에 동적으로 파일 리스트를 추가 -->
+        <div class="comment">
+            <c:forEach var="comment" items="${comment}">
+                <p class="timestamp">${comment.systemRegisterDatetime}</p>
+                <p>${comment.commentContent}</p>
+                <hr class="divider" />
+            </c:forEach>
+        </div>
     </div>
 
     <div class="comment-box">
-        <textarea placeholder="댓글을 입력해 주세요."></textarea>
-        <button class="button">등록</button>
+        <input type="text" id="commentContent" placeholder="댓글을 입력해 주세요." data-name="댓글 창">
+        <button class="button" id="comment-write-button" >댓글 등록</button>
     </div>
 
     <div class="actions">
-        <a href="/board-list" class="button">목록</a>
+        <a href="/board/paging" class="button">목록</a>
         <a href="#" class="button" onclick="location.href='/board-update-page?boardId=${detail.boardId}'">수정</a>
         <a href="#" class="button">삭제</a>
     </div>
 </div>
-
 </body>
 </html>
