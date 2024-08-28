@@ -26,4 +26,6 @@ public interface BoardService {
     List<BoardInfoDTO> getBoardList(int page);
 
     PageInfoDTO pagingParam(int page);
+
+    boolean checkPassword(BoardInfoDTO boardInfoDTO);
 }

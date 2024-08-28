@@ -1,10 +1,7 @@
 package com.sb.sbweek3.board.free;
 
 import com.sb.sbweek3.common.FileUtils;
-import com.sb.sbweek3.dto.BoardInfoDTO;
-import com.sb.sbweek3.dto.CommentInfoDTO;
-import com.sb.sbweek3.dto.PageInfoDTO;
-import com.sb.sbweek3.dto.SearchDTO;
+import com.sb.sbweek3.dto.*;
 import com.sb.sbweek3.exception.CustomException;
 import com.sb.sbweek3.exception.ExceptionErrorCode;
 import com.sb.sbweek3.file.FileMapper;
@@ -114,6 +111,19 @@ public class BoardServiceImpl implements BoardService{
 
     public BoardInfoDTO getDetailByBoardId(int boardId) {
         return boardMapper.getDetailByBoardId(boardId);
+    }
+
+    public boolean checkPassword(BoardInfoDTO boardInfoDTO) {
+        int savedPassword = boardMapper.findPasswordByBoardId(boardInfoDTO.getBoardId());
+        System.out.println("savedPassword ::: "+savedPassword);
+
+        int inputPassword = boardInfoDTO.getPassword();
+        if (inputPassword != savedPassword) {
+            return false;
+        }
+        boardMapper.deleteBoard(boardInfoDTO.getBoardId());
+        System.out.println(" 게시글 삭제 성공 ");
+        return true;
     }
 
     public Map<String, String> updateBoard(BoardInfoDTO boardInfoDTO) {

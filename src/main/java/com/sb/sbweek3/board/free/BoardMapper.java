@@ -25,4 +25,8 @@ public interface BoardMapper {
     void updateBoard(BoardInfoDTO boardInfoDTO);
 
     List<BoardInfoDTO> pagingList(Map<String, Integer> pagingParams);
+
+    int findPasswordByBoardId(int boardId);
+
+    void deleteBoard(int boardId);
 }

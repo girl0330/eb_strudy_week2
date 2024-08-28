@@ -115,7 +115,8 @@
     </select>
 
     <update id="updateBoard" parameterType="com.sb.sbweek3.dto.BoardInfoDTO">
-        UPDATE board_info
+        UPDATE /*BoardMapper.updateBoard*/
+            board_info
         SET
             title = #{title},
             content = #{content},
@@ -123,4 +124,17 @@
             system_update_datetime = now()
         WHERE board_id = #{boardId}
     </update>
+
+    <select id="findPasswordByBoardId" resultType="int" parameterType="int">
+        SELECT /*BoardMapper.findPasswordByBoardId*/
+        password
+        FROM board_info
+        WHERE board_id = #{boardId}
+    </select>
+
+    <delete id="deleteBoard" parameterType="int">
+        DELETE
+        FROM board_info
+        WHERE board_id = #{boardId}
+    </delete>
 </mapper>

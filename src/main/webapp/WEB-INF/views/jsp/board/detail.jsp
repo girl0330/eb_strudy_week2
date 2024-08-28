@@ -172,9 +172,9 @@
     </div>
 
     <div class="actions">
-        <a href="/board/paging" class="button">목록</a>
+        <a href="/board-list" class="button">목록</a>
         <a href="#" class="button" onclick="location.href='/board-update-page?boardId=${detail.boardId}'">수정</a>
-        <a href="#" class="button">삭제</a>
+        <a href="#" class="button" onclick="location.href='/board-delete-check?boardId=${detail.boardId}'">삭제</a>
     </div>
 </div>
 </body>

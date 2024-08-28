@@ -152,7 +152,7 @@
             </thead>
             <tbody>
             <!-- 데이터가 여기에 삽입됩니다 -->
-            <c:forEach var="list" items="${lists}">
+            <c:forEach var="list" items="${list}">
                 <tr>
                     <td>${list.categoryName}</td>
                     <td>${list.writer}</td>

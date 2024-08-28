@@ -7,6 +7,7 @@ import com.sb.sbweek3.common.FileUtils;
 import com.sb.sbweek3.dto.*;
 import com.sb.sbweek3.file.FileServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,7 +30,7 @@ public class BoardController {
     private final FileServiceImpl fileServiceImpl;
     private final FileUtils fileUtils;
 
-    @GetMapping("/board/paging")
+    @GetMapping("/board-list")
     public String showPagingList(Model model, @RequestParam(value = "page", required = false, defaultValue = "1") int page) {
         System.out.println("page = " + page);
         List<CategoryInfoDTO> categoryList = categoryServiceImpl.getCategoryList();
@@ -88,6 +89,35 @@ public class BoardController {
         model.addAttribute("comment", commentDetail);
         return "board/detail"; //todo : ResponseEntity
     }
+
+    @GetMapping("/board-delete-check")
+    public String checkPassword(@RequestParam("boardId") int boardId, Model model) {
+        model.addAttribute("boardId", boardId);
+        return "board/password-check";
+    }
+
+    @PostMapping("/ajax/delete-check.do")
+    public ResponseEntity<?> checkPassword(BoardInfoDTO boardInfoDTO) {
+        System.out.println("boardInfoDTO = " + boardInfoDTO);
+        boolean result = boardService.checkPassword(boardInfoDTO);
+
+        if (result) {
+            SuccessResponseDTO successResponse = SuccessResponseDTO.builder()
+                    .statusCode(200)
+                    .message("게시글이 성공적으로 삭제되었습니다.")
+                    .redirectUrl("/board-list")
+                    .build();
+            return new ResponseEntity<>(successResponse, HttpStatus.OK);
+        } else {
+            ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
+                    .statusCode(401)
+                    .message("비밀번호가 일치하지 않습니다.")
+                    .errorDetails("입력하신 비밀번호가 일치하지 않습니다. 다시 시도해 주세요.")
+                    .build();
+            return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+        }
+    }
+
     @GetMapping("/board-update-page")
     public String updatePage(@RequestParam("boardId") int boardId, @RequestParam(value = "page", required = false, defaultValue = "1") int page, Model model) {
         BoardInfoDTO boardDetail = boardService.getDetailByBoardId(boardId);
