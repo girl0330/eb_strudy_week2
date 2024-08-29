@@ -29,4 +29,6 @@ public interface BoardMapper {
     int findPasswordByBoardId(int boardId);
 
     void deleteBoard(int boardId);
+
+    void setView(int boardId);
 }

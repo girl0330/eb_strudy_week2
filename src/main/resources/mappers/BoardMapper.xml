@@ -4,32 +4,48 @@
 
     <select id="pagingList" parameterType="map" resultType="com.sb.sbweek3.dto.BoardInfoDTO">
         SELECT
-            *
-        FROM
-            board_info
-        ORDER BY
-            system_register_datetime DESC
-            LIMIT #{start}, #{limit}
-    </select>
-
-    <select id="getList" resultType="com.sb.sbweek3.dto.BoardInfoDTO">
-        SELECT /*BoardMapper.getList*/
             bi.board_id,
             bi.category_id,
-            (SELECT ci.category FROM category_info ci WHERE ci.category_id = bi.category_id)AS category_name,
             bi.writer,
             bi.password,
             bi.title,
             bi.content,
             bi.view_count,
             bi.system_register_datetime,
-            bi.system_update_datetime
-        FROM board_info bi
+            bi.system_update_datetime,
+            ci.category
+        FROM
+            board_info bi
+        JOIN
+            category_info ci ON bi.category_id = ci.category_id
+        ORDER BY
+            bi.system_register_datetime DESC
+        LIMIT #{start}, #{limit}
+    </select>
+
+    <select id="getList" resultType="com.sb.sbweek3.dto.BoardInfoDTO">
+        SELECT /*BoardMapper.getList*/
+            bi.board_id,
+            bi.category_id,
+            bi.writer,
+            bi.password,
+            bi.title,
+            bi.content,
+            bi.view_count,
+            bi.system_register_datetime,
+            bi.system_update_datetime,
+            ci.category
+        FROM
+            board_info bi
+        JOIN
+            category_info ci
+        ON bi.board_id = ci.board_id
     </select>
 
     <select id="getBoardDataTotal" resultType="int">
         SELECT COUNT(*) AS total_count
-        FROM board_info
+        FROM
+            board_info
     </select>
 
     <select id="getSearchListTotal" parameterType="com.sb.sbweek3.dto.SearchDTO" resultType="int">
@@ -50,15 +66,15 @@
 
     <select id="getListBySearch" parameterType="com.sb.sbweek3.dto.SearchDTO" resultType="com.sb.sbweek3.dto.BoardInfoDTO">
         SELECT
-        bi.category_id,
-        (SELECT ci.category FROM category_info ci WHERE ci.category_id = bi.category_id) AS category_name,
-        bi.writer,
-        bi.password,
-        bi.title,
-        bi.content,
-        bi.view_count,
-        bi.system_register_datetime,
-        bi.system_update_datetime
+            bi.category_id,
+            (SELECT ci.category FROM category_info ci WHERE ci.category_id = bi.category_id) AS category_name,
+            bi.writer,
+            bi.password,
+            bi.title,
+            bi.content,
+            bi.view_count,
+            bi.system_register_datetime,
+            bi.system_update_datetime
         FROM board_info bi
         <where>
             <if test="categoryId != 0">
@@ -76,26 +92,26 @@
     <insert id="saveBoard" parameterType="com.sb.sbweek3.dto.BoardInfoDTO" useGeneratedKeys="true" keyProperty="boardId" keyColumn="boardId">
         INSERT INTO board_info /*BoardMapper.saveBoard*/
         (
-         category_id,
-         writer,
-         password,
-         title,
-         content,
-         view_count,
-         system_register_datetime,
-         system_update_datetime
+            category_id,
+            writer,
+            password,
+            title,
+            content,
+            view_count,
+            system_register_datetime,
+            system_update_datetime
         )
         VALUES
             (
-            #{categoryId},
-            #{writer},
-            #{password},
-            #{title},
-            #{content},
-            #{viewCount},
-            now(),
-            now()
-            )
+                #{categoryId},
+                #{writer},
+                #{password},
+                #{title},
+                #{content},
+                #{viewCount},
+                NOW(),
+                NOW()
+            );
     </insert>
 
     <select id="getDetailByBoardId" parameterType="int" resultType="com.sb.sbweek3.dto.BoardInfoDTO">
@@ -110,8 +126,10 @@
             bi.view_count,
             bi.system_register_datetime,
             bi.system_update_datetime
-        from board_info bi
-        where board_id = #{boardId}
+        from
+            board_info bi
+        where
+            board_id = #{boardId}
     </select>
 
     <update id="updateBoard" parameterType="com.sb.sbweek3.dto.BoardInfoDTO">
@@ -120,21 +138,34 @@
         SET
             title = #{title},
             content = #{content},
-            view_count = #{viewCount},
             system_update_datetime = now()
-        WHERE board_id = #{boardId}
+        WHERE
+            board_id = #{boardId}
+    </update>
+
+    <update id="setView" parameterType="int">
+        UPDATE /*BoardMapper.setView*/
+            board_info
+        SET
+            view_count = view_count +1
+        WHERE
+            board_id = #{boardId}
     </update>
 
     <select id="findPasswordByBoardId" resultType="int" parameterType="int">
         SELECT /*BoardMapper.findPasswordByBoardId*/
         password
-        FROM board_info
-        WHERE board_id = #{boardId}
+        FROM
+            board_info
+        WHERE
+            board_id = #{boardId}
     </select>
 
     <delete id="deleteBoard" parameterType="int">
         DELETE
-        FROM board_info
-        WHERE board_id = #{boardId}
+        FROM
+            board_info
+        WHERE
+            board_id = #{boardId}
     </delete>
 </mapper>

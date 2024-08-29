@@ -28,4 +28,7 @@ public interface BoardService {
     PageInfoDTO pagingParam(int page);
 
     boolean checkPassword(BoardInfoDTO boardInfoDTO);
+
+    /* 조회수 처리 */
+    void setView(int boardId);
 }

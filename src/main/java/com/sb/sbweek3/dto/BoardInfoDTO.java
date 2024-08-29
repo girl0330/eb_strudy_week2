@@ -15,6 +15,7 @@ public class BoardInfoDTO {
     private int boardId; // 게시글 ID
     private int categoryId; // 카테고리 ID
     private String categoryName; //카테고리 이름
+    private String category; // 카테고리 이름
     private String writer; // 작성자
     private int password; // 비밀번호
     private String title; // 제목
@@ -22,6 +23,7 @@ public class BoardInfoDTO {
     private int viewCount; // 조회수
     private String systemRegisterDatetime; // 등록일시
     private String systemUpdateDatetime; // 수정일시
+    private String viewSet = "no";//조회수 즈가
 
     private List<MultipartFile> files = new ArrayList<>(); // 첨부파일 List
     private List<Integer> deleteFileIds = new ArrayList<>(); // 삭제할 첨부파일 fileId List

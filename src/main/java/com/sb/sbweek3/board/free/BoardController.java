@@ -33,10 +33,12 @@ public class BoardController {
     @GetMapping("/board-list")
     public String showPagingList(Model model, @RequestParam(value = "page", required = false, defaultValue = "1") int page) {
         System.out.println("page = " + page);
-        List<CategoryInfoDTO> categoryList = categoryServiceImpl.getCategoryList();
+        List<CategoryInfoDTO> categoryList = categoryServiceImpl.getCategoryList(); //검색
         List<BoardInfoDTO> boardList = boardService.getBoardList(page);
         PageInfoDTO pageInfoDTO = boardService.pagingParam(page);
         int total = boardService.getListTotal();
+
+        System.out.println("boardList 확인 : "+boardList);
 
         model.addAttribute("list", boardList);
         model.addAttribute("total", total);
@@ -81,10 +83,17 @@ public class BoardController {
     //todo : @PathVariable과 @RequestParam(쿼리 스트링으로 받음 -> 가변적일 때 )의 차이점
 
     @GetMapping("/board-detail-page")
-    public String detailPage(@RequestParam("boardId") int boardId, Model model) {
+    public String detailPage(@RequestParam("boardId") int boardId,
+                             @RequestParam(value = "viewSet", defaultValue = "no") String viewSet, Model model) {
+
+        if ("yes".equals(viewSet)) {
+            boardService.setView(boardId);
+            return "redirect:board-detail-page?boardId=" + boardId;
+        }
+
         BoardInfoDTO boardDetail = boardService.getDetailByBoardId(boardId);
         List<CommentInfoDTO> commentDetail = commentService.getDetailByBoardId(boardId);
-        System.out.println("commentService 확인 : "+commentDetail);
+
         model.addAttribute("detail", boardDetail);
         model.addAttribute("comment", commentDetail);
         return "board/detail"; //todo : ResponseEntity

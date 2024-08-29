@@ -142,4 +142,12 @@ public class BoardServiceImpl implements BoardService{
         }
     }
 
+    /**
+     * 조회수 증가
+     * @param boardId - BoardId로 조회
+     */
+    public void setView(int boardId) {
+        boardMapper.setView(boardId);
+    }
+
 }

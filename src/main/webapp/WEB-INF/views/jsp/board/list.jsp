@@ -83,6 +83,16 @@
         }
     };
 
+    let goDetail = (event) => {
+        // 클릭된 링크의 부모 <td> 요소를 찾습니다.
+        let parentTd = $(event.target).closest('td');
+
+        // 부모 <td> 내의 <input> 요소를 찾고, 그 값을 가져옵니다.
+        let boardId = parentTd.find('#boardId').val();
+
+        window.location.href = "/board-detail-page?boardId=" + boardId + "&viewSet=yes";
+    }
+
     $(document).ready(function() {
         $('#searchButton').on('click', function (e) {
             alert("???")
@@ -118,17 +128,6 @@
             <label for="searchKeyword"></label>
             <input type="text" id="searchKeyword" name="searchKeyword" placeholder="검색어 입력" data-valid="true">
             <button type="button" id="searchButton">검색</button>
-
-<%--            <select id="searchType" name="searchType" title="검색 유형 선택">--%>
-<%--                <option value="">전체 검색</option>--%>
-<%--                <option value="title">제목</option>--%>
-<%--                <option value="content">내용</option>--%>
-<%--                <option value="writer">작성자</option>--%>
-<%--            </select>--%>
-
-<%--            <input type="text" id="searchKeyword" name="searchKeyword" placeholder="검색어 입력" data-valid="true">--%>
-
-<%--            <button type="button" id="searchButton">검색</button>--%>
         </form>
     </div>
 
@@ -154,11 +153,12 @@
             <!-- 데이터가 여기에 삽입됩니다 -->
             <c:forEach var="list" items="${list}">
                 <tr>
-                    <td>${list.categoryName}</td>
+                    <td>${list.category}</td>
                     <td>${list.writer}</td>
-                    <td><a href="/board-detail-page?boardId=${list.boardId}">
-                            ${list.title}
-                    </a></td>
+                    <td>
+                        <input type="hidden" id="boardId" value="${list.boardId}">
+                        <a href="#" id="detail-board" onclick="goDetail(event)"> ${list.title} </a>
+                    </td>
                     <td>${list.viewCount}</td>
                     <td>${list.systemRegisterDatetime}</td>
                     <td>${list.systemUpdateDatetime}</td>
