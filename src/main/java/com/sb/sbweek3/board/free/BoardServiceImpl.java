@@ -52,7 +52,7 @@ public class BoardServiceImpl implements BoardService{
         // 시자페이지 값 계산
         int startPage = (int)(Math.ceil((double) page / blockLimit) -1 )  * blockLimit + 1;
         int endPage = startPage + blockLimit -1 ;
-        if (endPage == startPage) {
+        if (endPage > startPage) {
             endPage = maxPage;
         }
 

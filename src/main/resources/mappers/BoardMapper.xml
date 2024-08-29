@@ -3,7 +3,7 @@
 <mapper namespace="com.sb.sbweek3.board.free.BoardMapper">
 
     <select id="pagingList" parameterType="map" resultType="com.sb.sbweek3.dto.BoardInfoDTO">
-        SELECT
+        SELECT /*BoardMapper.pagingList*/
             bi.board_id,
             bi.category_id,
             bi.writer,
@@ -43,13 +43,15 @@
     </select>
 
     <select id="getBoardDataTotal" resultType="int">
-        SELECT COUNT(*) AS total_count
+        SELECT /*BoardMapper.getBoardDataTotal*/
+            COUNT(*) AS total_count
         FROM
             board_info
     </select>
 
     <select id="getSearchListTotal" parameterType="com.sb.sbweek3.dto.SearchDTO" resultType="int">
-    SELECT COUNT(*) AS total_count
+    SELECT /*BoardMapper.getSearchListTotal*/
+        COUNT(*) AS total_count
     FROM board_info
         <where>
             <if test="categoryId != 0">
@@ -65,7 +67,7 @@
     </select>
 
     <select id="getListBySearch" parameterType="com.sb.sbweek3.dto.SearchDTO" resultType="com.sb.sbweek3.dto.BoardInfoDTO">
-        SELECT
+        SELECT /*BoardMapper.getListBySearch*/
             bi.category_id,
             (SELECT ci.category FROM category_info ci WHERE ci.category_id = bi.category_id) AS category_name,
             bi.writer,
@@ -90,17 +92,17 @@
     </select>
 
     <insert id="saveBoard" parameterType="com.sb.sbweek3.dto.BoardInfoDTO" useGeneratedKeys="true" keyProperty="boardId" keyColumn="boardId">
-        INSERT INTO board_info /*BoardMapper.saveBoard*/
-        (
-            category_id,
-            writer,
-            password,
-            title,
-            content,
-            view_count,
-            system_register_datetime,
-            system_update_datetime
-        )
+        INSERT INTO /*BoardMapper.saveBoard*/
+            board_info
+            (
+                category_id,
+                writer,
+                password,
+                title,
+                content,
+                system_register_datetime,
+                system_update_datetime
+            )
         VALUES
             (
                 #{categoryId},
@@ -108,7 +110,6 @@
                 #{password},
                 #{title},
                 #{content},
-                #{viewCount},
                 NOW(),
                 NOW()
             );
@@ -162,7 +163,7 @@
     </select>
 
     <delete id="deleteBoard" parameterType="int">
-        DELETE
+        DELETE /*BoardMapper.deleteBoard*/
         FROM
             board_info
         WHERE

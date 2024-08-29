@@ -168,20 +168,39 @@
         </table>
     </div>
     <div id="pagination">
-        <!-- 이전 페이지 링크 -->
-        <c:if test="${pageInfoDTO.currentPage > 1}">
-            <a href="?page=${pageInfoDTO.previousPage}" class="page-link">이전</a>
-        </c:if>
+        <c:choose>
+            <%-- 현재 페이지가 1페이지면 이전 글자만 보여줌 --%>
+            <c:when test="${paging.page<=1}">
+                <span>[이전]</span>
+            </c:when>
+            <%-- 1페이지가 아닌 경우에는 [이전]을 클릭하면 현재 페이지보다 1 작은 페이지 요청 --%>
+            <c:otherwise>
+                <a href="/board-list?page=${paging.page-1}">[이전]</a>
+            </c:otherwise>
+        </c:choose>
 
-        <!-- 페이지 번호 링크 -->
-        <c:forEach var="i" begin="${pageInfoDTO.startPageIndex}" end="${pageInfoDTO.endPageIndex}">
-            <a href="?page=${i}" class="page-link ${pageInfoDTO.currentPage == i ? 'active' : ''}">${i}</a>
+        <%--  for(int i=startPage; i<=endPage; i++)      --%>
+        <c:forEach begin="${paging.startPage}" end="${paging.endPage}" var="i" step="1">
+            <c:choose>
+                <%-- 요청한 페이지에 있는 경우 현재 페이지 번호는 텍스트만 보이게 --%>
+                <c:when test="${i eq paging.page}">
+                    <span>${i}</span>
+                </c:when>
+
+                <c:otherwise>
+                    <a href="/board-list?page=${i}">${i}</a>
+                </c:otherwise>
+            </c:choose>
         </c:forEach>
 
-        <!-- 다음 페이지 링크 -->
-        <c:if test="${pageInfoDTO.currentPage < pageInfoDTO.pageTotal}">
-            <a href="?page=${pageInfoDTO.nextPage}" class="page-link">다음</a>
-        </c:if>
+        <c:choose>
+            <c:when test="${paging.page>=paging.maxPage}">
+                <span>[다음]</span>
+            </c:when>
+            <c:otherwise>
+                <a href="/board-list?page=${paging.page+1}">[다음]</a>
+            </c:otherwise>
+        </c:choose>
     </div>
 </div>
 </body>

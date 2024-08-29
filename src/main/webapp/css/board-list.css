@@ -109,13 +109,18 @@ a:hover {
     background-color: #45a049;
 }
 
-#pagination {
+#pagination{
     display: flex;
     justify-content: center;
     align-items: center;
     margin-top: 20px;
     font-family: Arial, sans-serif;
 }
+
+#pagination a, #pagination span {
+    margin: 0 10px;
+}
+
 
 .page-link {
     margin: 0 5px;

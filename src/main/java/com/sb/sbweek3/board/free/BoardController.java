@@ -30,12 +30,17 @@ public class BoardController {
     private final FileServiceImpl fileServiceImpl;
     private final FileUtils fileUtils;
 
+    /**
+     * 게시글 목록
+     * @param page - 페이지 블럭 값
+     * @return - 페이지 화면
+     */
     @GetMapping("/board-list")
     public String showPagingList(Model model, @RequestParam(value = "page", required = false, defaultValue = "1") int page) {
         System.out.println("page = " + page);
         List<CategoryInfoDTO> categoryList = categoryServiceImpl.getCategoryList(); //검색
         List<BoardInfoDTO> boardList = boardService.getBoardList(page);
-        PageInfoDTO pageInfoDTO = boardService.pagingParam(page);
+        PageInfoDTO pageInfoDTO = boardService.pagingParam(page); //
         int total = boardService.getListTotal();
 
         System.out.println("boardList 확인 : "+boardList);
