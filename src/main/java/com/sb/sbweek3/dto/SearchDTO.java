@@ -8,5 +8,9 @@ public class SearchDTO {
     private int categoryId; // 검색 카테고리 ID
     private String startDate; // 시작일
     private String endDate; // 종료일
+    private int page;
+
+    private int start;
+    private int limit;
 
 }

@@ -23,8 +23,8 @@
         LIMIT #{start}, #{limit}
     </select>
 
-    <select id="getList" resultType="com.sb.sbweek3.dto.BoardInfoDTO">
-        SELECT /*BoardMapper.getList*/
+    <select id="getBoardList" parameterType="com.sb.sbweek3.dto.SearchDTO" resultType="com.sb.sbweek3.dto.BoardInfoDTO">
+        SELECT /*BoardMapper.getBoardList*/
             bi.board_id,
             bi.category_id,
             bi.writer,
@@ -39,20 +39,29 @@
             board_info bi
         JOIN
             category_info ci
-        ON bi.board_id = ci.board_id
+        ON
+            bi.category_id = ci.category_id
+        <where>
+            <if test="categoryId != 0">
+                bi.category_id = #{categoryId}
+            </if>
+            <if test="searchKeyword != null and searchKeyword != ''">
+                AND bi.title LIKE CONCAT('%', #{searchKeyword}, '%')
+            </if>
+            <if test="startDate != null and startDate != '' and endDate != null and endDate != ''">
+                AND bi.system_register_datetime BETWEEN #{startDate} AND #{endDate}
+            </if>
+        </where>
+        ORDER BY
+            bi.system_register_datetime DESC
+        LIMIT #{start}, #{limit}
     </select>
 
-    <select id="getBoardDataTotal" resultType="int">
-        SELECT /*BoardMapper.getBoardDataTotal*/
-            COUNT(*) AS total_count
+    <select id="getListTotal" parameterType="com.sb.sbweek3.dto.SearchDTO" resultType="int">
+        SELECT /*BoardMapper.getListTotal*/
+            COUNT(*)
         FROM
             board_info
-    </select>
-
-    <select id="getSearchListTotal" parameterType="com.sb.sbweek3.dto.SearchDTO" resultType="int">
-    SELECT /*BoardMapper.getSearchListTotal*/
-        COUNT(*) AS total_count
-    FROM board_info
         <where>
             <if test="categoryId != 0">
                 category_id = #{categoryId}
@@ -64,6 +73,23 @@
                 AND system_register_datetime BETWEEN #{startDate} AND #{endDate}
             </if>
         </where>
+    </select>
+
+    <select id="getSearchListTotal" parameterType="com.sb.sbweek3.dto.SearchDTO" resultType="int">
+    SELECT /*BoardMapper.getSearchListTotal*/
+        COUNT(*) AS total_count
+    FROM board_info
+        <where>
+        <if test="categoryId != 0">
+            category_id = #{categoryId}
+        </if>
+        <if test="searchKeyword != null and !searchKeyword.isEmpty()">
+            AND title LIKE CONCAT('%', #{searchKeyword}, '%')
+        </if>
+        <if test="startDate != null and !startDate.isEmpty() and endDate != null and !endDate.isEmpty()">
+            AND system_register_datetime BETWEEN #{startDate} AND #{endDate}
+        </if>
+    </where>
     </select>
 
     <select id="getListBySearch" parameterType="com.sb.sbweek3.dto.SearchDTO" resultType="com.sb.sbweek3.dto.BoardInfoDTO">

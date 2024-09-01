@@ -29,7 +29,7 @@ public class BoardServiceImpl implements BoardService{
     int blockLimit = 10;
 
 
-    public List<BoardInfoDTO> getBoardList(int page) {
+    public List<BoardInfoDTO> getBoardList(int page, SearchDTO searchDTO) {
         /*
         보여지는 item 수 : 12개
         1 페이지 요청 : 0
@@ -38,16 +38,19 @@ public class BoardServiceImpl implements BoardService{
          */
 
         int pagingStart = (page -1) * pageLimit;
-        Map<String, Integer> pagingParams = new HashMap<>();
-        pagingParams.put("start", pagingStart);
-        pagingParams.put("limit", pageLimit);
-        List<BoardInfoDTO> pagingList = boardMapper.pagingList(pagingParams);
+        searchDTO.setStart(pagingStart);
+        searchDTO.setLimit(pageLimit);
+        List<BoardInfoDTO> pagingList = boardMapper.getBoardList(searchDTO);
+
+//        pagingParams.put("start", pagingStart);
+//        pagingParams.put("limit", pageLimit);
+//        List<BoardInfoDTO> pagingList = boardMapper.pagingList(pagingParams);
 
         return pagingList;
     }
 
-    public PageInfoDTO pagingParam(int page) {
-        int boardTotal = boardMapper.getBoardDataTotal();
+    public PageInfoDTO pagingParam(int page, SearchDTO searchDTO) {
+        int boardTotal = boardMapper.getListTotal(searchDTO);
         int maxPage = (int) (Math.ceil((double) boardTotal / pageLimit));
         // 시자페이지 값 계산
         int startPage = (int)(Math.ceil((double) page / blockLimit) -1 )  * blockLimit + 1;
@@ -63,30 +66,30 @@ public class BoardServiceImpl implements BoardService{
                           .endPage(endPage)
                           .build();
     }
-    public int getListTotal() {
-        return boardMapper.getBoardDataTotal();
+    public int getListTotal(SearchDTO searchDTO) {
+        return boardMapper.getListTotal(searchDTO);
     }
 
-    public List<BoardInfoDTO> getList() {
-        return boardMapper.getList();
-    }
+//    public List<BoardInfoDTO> getList() {
+//        return boardMapper.getList();
+//    }
 
 
-    public List<SearchDTO> getListBySearch(String startDate, String endDate, int categoryId, String searchKeyword) {
+//    public List<SearchDTO> getListBySearch(String startDate, String endDate, int categoryId, String searchKeyword) {
+//
+//        SearchDTO searchDTO = new SearchDTO();
+//        searchDTO.setSearchKeyword(searchKeyword);
+//        searchDTO.setCategoryId(categoryId);
+//        searchDTO.setEndDate(endDate);
+//        searchDTO.setStartDate(startDate);
+//
+//        System.out.println("검색 키워드들 확인 :; "+searchDTO);
+//        return boardMapper.getListBySearch(searchDTO);
+//    }
 
-        SearchDTO searchDTO = new SearchDTO();
-        searchDTO.setSearchKeyword(searchKeyword);
-        searchDTO.setCategoryId(categoryId);
-        searchDTO.setEndDate(endDate);
-        searchDTO.setStartDate(startDate);
-
-        System.out.println("검색 키워드들 확인 :; "+searchDTO);
-        return boardMapper.getListBySearch(searchDTO);
-    }
-
-    public int getSearchListTotal(String startDate, String endDate, int categoryId, String searchKeyword) {
-        return boardMapper.getSearchListTotal(startDate, endDate, categoryId, searchKeyword);
-    }
+//    public int getSearchListTotal(String startDate, String endDate, int categoryId, String searchKeyword) {
+//        return boardMapper.getSearchListTotal(startDate, endDate, categoryId, searchKeyword);
+//    }
 
     public Map<String, String> saveBoard(BoardInfoDTO boardInfoDTO) {
         try {

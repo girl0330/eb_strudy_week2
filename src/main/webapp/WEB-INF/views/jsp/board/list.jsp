@@ -14,74 +14,69 @@
 <script>
     const keywordSearch = {
         init : function () {
+            // 유효성 검사
+            if (!this.validationCheck()) {
+                alert("유효성 검사 실패");
+                return;
+            }
             this.keywordSearchSubmit();
+        },
+        // 유효성 검사 특수문자 사용 금지
+        validationCheck: function () {
+            let valid = true;
+            const startDate = $('#startDate').val();
+            const endDate = $('#endDate').val();
+            const searchKeyword = $('#searchKeyword').val();
+
+            let specialCharPattern = /[.!@#$%^&*]+/;
+            if (specialCharPattern.test(searchKeyword)) {
+                alert("검색 키워드는 특수 문자를 사용할 수 없습니다.")
+                $('#searchKeyword').focus();
+                valid = false;
+                return valid;
+            }
+            let invalidCharPattern = /[a-zA-Zㄱ-ㅎ가-힣]+/;
+            if (invalidCharPattern.test(startDate)) {
+                alert("시작일에는 영어 또는 한글을 사용할 수 없습니다.");
+                $('#startDate').focus();
+                valid = false;
+                return valid;
+            }
+            if (invalidCharPattern.test(endDate)) {
+                alert("종료일에는 영어 또는 한글을 사용할 수 없습니다.");
+                $('#endDate').focus();
+                valid = false;
+                return valid;
+            }
+            return valid;
         },
 
         keywordSearchSubmit: function () {
-            const formData = $("#searchForm").serialize();
+            const $form = $('#searchForm');
 
-            $.ajax({
-                url: '/ajax/search/board-list.do',  // 서버의 엔드포인트 URL
-                type: 'GET',
-                data: formData,
-                success: (response) => {
-                    console.log("검색 결과 리스트:"+JSON.stringify(response));
-                    keywordSearch.renderSearchList(response);
-                },
-                error: function(xhr, status, error) {
-                    // 서버에서 받은 JSON 오류 응답 처리
-                    let errorMessage = xhr.responseJSON ? xhr.responseJSON.message : "알 수 없는 오류가 발생했습니다.";
-                    console.error('파일 업로드 실패:', errorMessage);
-
-                    // 사용자에게 오류 메시지 표시
-                    alert("오류 발생: " + errorMessage);
-                }
-            });
-        },
-
-        renderSearchList: function (response) {
-            const searchListsTotal = response.searchListsTotal;
-            const searchLists = response.searchLists;
-            const container = $("#listArea");
-            container.empty();
-
-            let searchListHtml =
-                `<div id="info-bar">` +
-                `<span id="total-count">총` + searchListsTotal + `건</span>` +
-                `<a href="/board-post-page" class="btn">글 작성하기</a>` +
-                `</div>` +
-                `<table id="data-table">` +
-                `<thead>` +
-                `<tr>` +
-                `<th>카테고리</th>` +
-                `<th>작성자</th>` +
-                `<th>제목</th>` +
-                `<th>조회수</th>` +
-                `<th>작성일</th>` +
-                `<th>수정일</th>` +
-                `</tr>` +
-                `</thead>` +
-                `<tbody>`;
-
-            searchLists.forEach(item => {
-                searchListHtml +=
-                    `<tr>` +
-                        `<td>` + item.categoryName + `</td>` +
-                        `<td>` + item.writer + `</td>` +
-                        `<td><a href="/board-detail-page?boardId= + item.boardId + ">` + item.title + `</a></td>` +
-                        `<td>` + item.viewCount + `</td>` +
-                        `<td>` + item.systemRegisterDatetime + `</td>` +
-                        `<td>` + item.systemUpdateDatetime + `</td>` +
-                    `</tr>`;
+            $form.find('input[type="text"]').each(function() {
+                const $input = $(this);
+                $input.val($input.val().trim());
             });
 
-            searchListHtml +=
-                `</tbody>` +
-                `</table>`;
+            const formData = $form.serialize();
 
-            container.append(searchListHtml);
+            // 검색 시 새로운 쿼리스트링을 사용하여 페이지 이동
+            window.location.href = "/board-list?" + formData;
         }
     };
+
+    let navigatePage = (page) => {
+        // 현재 URL의 쿼리스트링을 가져옵니다.
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+
+        // 현재 쿼리스트링에서 "page" 파라미터를 설정합니다.
+        urlParams.set('page', page);
+
+        // 쿼리스트링을 유지하면서 페이지를 이동합니다.
+        window.location.href = "/board-list?" + urlParams.toString();
+    }
 
     let goDetail = (event) => {
         // 클릭된 링크의 부모 <td> 요소를 찾습니다.
@@ -89,7 +84,6 @@
 
         // 부모 <td> 내의 <input> 요소를 찾고, 그 값을 가져옵니다.
         let boardId = parentTd.find('#boardId').val();
-
         window.location.href = "/board-detail-page?boardId=" + boardId + "&viewSet=yes";
     }
 
@@ -110,23 +104,21 @@
 
             <!-- 등록일 필터 -->
             <label for="startDate">등록일: </label>
-            <input type="text" id="startDate" name="startDate" placeholder="시작일" data-valid="true">
+            <input type="text" id="startDate" name="startDate" placeholder="시작일" data-valid="true" value="${search.startDate}">
             <span>~</span>
-            <input type="text" id="endDate" name="endDate" placeholder="종료일" data-valid="true">
+            <input type="text" id="endDate" name="endDate" placeholder="종료일" data-valid="true" value="${search.endDate}">
 
-            <!-- 카테고리 필터 -->
-            <label for="categoryId"></label>
+            <label for="categoryId">카테고리: </label>
             <select id="categoryId" name="categoryId" data-valid="true">
                 <option value="0">카테고리 선택</option>
                 <!-- categoryLists를 반복하여 옵션을 생성 -->
-                <c:forEach var="categoryList" items="${categoryLists}">
-                    <option value="${categoryList.categoryId}">${categoryList.category}</option>
+                <c:forEach var="category" items="${category}">
+                    <option value="${category.categoryId}" ${search.categoryId == category.categoryId ? 'selected' : ''}>${category.category}</option>
                 </c:forEach>
             </select>
 
-            <!-- 검색어 입력 -->
-            <label for="searchKeyword"></label>
-            <input type="text" id="searchKeyword" name="searchKeyword" placeholder="검색어 입력" data-valid="true">
+            <label for="searchKeyword">검색어: </label>
+            <input type="text" id="searchKeyword" name="searchKeyword" placeholder="검색어 입력" data-valid="true" value="${search.searchKeyword}">
             <button type="button" id="searchButton">검색</button>
         </form>
     </div>
@@ -169,37 +161,26 @@
     </div>
     <div id="pagination">
         <c:choose>
-            <%-- 현재 페이지가 1페이지면 이전 글자만 보여줌 --%>
-            <c:when test="${paging.page<=1}">
-                <span>[이전]</span>
+            <c:when test="${paging.page > 1}">
+                <a href="javascript:void(0)" onclick="navigatePage(${paging.page-1})">[이전]</a>
             </c:when>
-            <%-- 1페이지가 아닌 경우에는 [이전]을 클릭하면 현재 페이지보다 1 작은 페이지 요청 --%>
-            <c:otherwise>
-                <a href="/board-list?page=${paging.page-1}">[이전]</a>
-            </c:otherwise>
         </c:choose>
 
-        <%--  for(int i=startPage; i<=endPage; i++)      --%>
         <c:forEach begin="${paging.startPage}" end="${paging.endPage}" var="i" step="1">
             <c:choose>
-                <%-- 요청한 페이지에 있는 경우 현재 페이지 번호는 텍스트만 보이게 --%>
                 <c:when test="${i eq paging.page}">
                     <span>${i}</span>
                 </c:when>
-
                 <c:otherwise>
-                    <a href="/board-list?page=${i}">${i}</a>
+                    <a href="javascript:void(0)" onclick="navigatePage(${i})">${i}</a>
                 </c:otherwise>
             </c:choose>
         </c:forEach>
 
         <c:choose>
-            <c:when test="${paging.page>=paging.maxPage}">
-                <span>[다음]</span>
+            <c:when test="${paging.page < paging.maxPage}">
+                <a href="javascript:void(0)" onclick="navigatePage(${paging.page+1})">[다음]</a>
             </c:when>
-            <c:otherwise>
-                <a href="/board-list?page=${paging.page+1}">[다음]</a>
-            </c:otherwise>
         </c:choose>
     </div>
 </div>

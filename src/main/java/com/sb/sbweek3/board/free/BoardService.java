@@ -8,13 +8,18 @@ import java.util.List;
 import java.util.Map;
 
 public interface BoardService {
-    List<BoardInfoDTO> getList();
+    List<BoardInfoDTO> getBoardList(int page, SearchDTO searchDTO);
 
-    int getListTotal();
+    PageInfoDTO pagingParam(int page, SearchDTO searchDTO);
 
-    int getSearchListTotal(String startDate, String endDate, int categoryId, String searchKeyword);
+    int getListTotal(SearchDTO searchDTO);
 
-    List<SearchDTO> getListBySearch(String startDate, String endDate, int categoryId, String searchKeyword);
+//    List<BoardInfoDTO> getList();
+
+//    int getSearchListTotal(String startDate, String endDate, int categoryId, String searchKeyword);
+//
+
+//    List<SearchDTO> getListBySearch(String startDate, String endDate, int categoryId, String searchKeyword);
 
     Map<String, String> saveBoard(BoardInfoDTO boardInfoDTO);
 
@@ -22,10 +27,6 @@ public interface BoardService {
 
 
     Map<String, String> updateBoard(BoardInfoDTO boardInfoDTO);
-
-    List<BoardInfoDTO> getBoardList(int page);
-
-    PageInfoDTO pagingParam(int page);
 
     boolean checkPassword(BoardInfoDTO boardInfoDTO);
 

@@ -10,9 +10,9 @@ import java.util.Map;
 //mybatisX 플러그인
 @Mapper
 public interface BoardMapper {
-    List<BoardInfoDTO> getList ();
+    List<BoardInfoDTO> getBoardList (SearchDTO searchDTO);
 
-    int getBoardDataTotal();
+    int getListTotal(SearchDTO searchDTO);
 
     int getSearchListTotal(String startDate, String endDate, int categoryId, String searchKeyword);
 

@@ -14,7 +14,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,12 +35,15 @@ public class BoardController {
      * @return - 페이지 화면
      */
     @GetMapping("/board-list")
-    public String showPagingList(Model model, @RequestParam(value = "page", required = false, defaultValue = "1") int page) {
+    public String showPagingList(Model model, @RequestParam(value = "page", required = false, defaultValue = "1") int page, @ModelAttribute SearchDTO searchDTO) {
         System.out.println("page = " + page);
+        System.out.println("searchDTO 확인 : "+searchDTO);
         List<CategoryInfoDTO> categoryList = categoryServiceImpl.getCategoryList(); //검색
-        List<BoardInfoDTO> boardList = boardService.getBoardList(page);
-        PageInfoDTO pageInfoDTO = boardService.pagingParam(page); //
-        int total = boardService.getListTotal();
+        System.out.println("categoryList 확인 : "+categoryList);
+        List<BoardInfoDTO> boardList = boardService.getBoardList(page, searchDTO);
+        System.out.println("확인 : "+ searchDTO);
+        PageInfoDTO pageInfoDTO = boardService.pagingParam(page, searchDTO); //
+        int total = boardService.getListTotal(searchDTO);
 
         System.out.println("boardList 확인 : "+boardList);
 
@@ -49,29 +51,30 @@ public class BoardController {
         model.addAttribute("total", total);
         model.addAttribute("paging", pageInfoDTO);
         model.addAttribute("category",categoryList);
+        model.addAttribute("search",searchDTO);
         return "board/list";
     }
-
-    //todo : 동적 리스트 total
-    @ResponseBody
-    @GetMapping("/ajax/search/board-list.do") //todo: (ajax)페이지 이동을 시켜줌 returnView
-    public ResponseEntity<Map<String, Object>> getSearchBoardList(  //todo: dto로 만들어 사용
-                                                                    @RequestParam(value = "startDate", required = false) String startDate,
-                                                                    @RequestParam(value = "endDate", required = false) String endDate,
-                                                                    @RequestParam(value = "categoryId", required = false) int categoryId,
-                                                                    @RequestParam(value = "searchKeyword", required = false) String searchKeyword) {
-
-        List<SearchDTO> searchLists = boardService.getListBySearch(startDate, endDate, categoryId, searchKeyword);
-        int searchListsTotal = boardService.getSearchListTotal(startDate, endDate, categoryId, searchKeyword);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("searchLists", searchLists);
-        response.put("searchListsTotal", searchListsTotal);
-//        model.addAttribute("total", total);
-//        model.addAttribute("searchLists", searchLists);
-
-        return ResponseEntity.ok(response);
-    }
+//
+//    //todo : 동적 리스트 total
+//    @GetMapping("/ajax/search/board-list.do")
+//    public ResponseEntity<Map<String, Object>> getSearchBoardList(
+//            @RequestParam(value = "startDate", required = false) String startDate,
+//            @RequestParam(value = "endDate", required = false) String endDate,
+//            @RequestParam(value = "categoryId", required = false) Integer categoryId,  // int에서 Integer로 변경
+//            @RequestParam(value = "searchKeyword", required = false) String searchKeyword) {
+//
+//        System.out.println("startDate = " + startDate + ", endDate = " + endDate + ", categoryId = " + categoryId + ", searchKeyword = " + searchKeyword);
+//        List<SearchDTO> searchLists = boardService.getListBySearch(startDate, endDate, categoryId, searchKeyword);
+//        int searchListsTotal = boardService.getSearchListTotal(startDate, endDate, categoryId, searchKeyword);
+//
+//        Map<String, Object> response = new HashMap<>();
+//        response.put("searchLists", searchLists);
+//        response.put("searchListsTotal", searchListsTotal);
+////        model.addAttribute("total", total);
+////        model.addAttribute("searchLists", searchLists);
+//
+//        return ResponseEntity.ok(response);
+//    }
 
     @GetMapping("/board-post-page")
     public String postPage() {
