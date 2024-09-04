@@ -5,8 +5,12 @@ import com.sb.sbweek3.category.CategoryServiceImpl;
 import com.sb.sbweek3.comment.CommentService;
 import com.sb.sbweek3.common.FileUtils;
 import com.sb.sbweek3.dto.*;
+import com.sb.sbweek3.exception.CustomException;
+import com.sb.sbweek3.exception.ExceptionErrorCode;
 import com.sb.sbweek3.file.FileServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -14,15 +18,15 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 //todo : @GetMapping, spring boot version 2.7.x
 //todo : list부터 먼저 쭉 만들고 넘어  가기
 @Controller
 @RequiredArgsConstructor
 public class BoardController {
-
+    private static final Logger logger = LoggerFactory.getLogger(BoardServiceImpl.class);
     private final BoardService boardService;
     private final CommentService commentService;
     private final CategoryServiceImpl categoryServiceImpl;
@@ -36,60 +40,58 @@ public class BoardController {
      */
     @GetMapping("/board-list")
     public String showPagingList(Model model, @RequestParam(value = "page", required = false, defaultValue = "1") int page, @ModelAttribute SearchDTO searchDTO) {
-        System.out.println("page = " + page);
-        System.out.println("searchDTO 확인 : "+searchDTO);
-        List<CategoryInfoDTO> categoryList = categoryServiceImpl.getCategoryList(); //검색
-        System.out.println("categoryList 확인 : "+categoryList);
-        List<BoardInfoDTO> boardList = boardService.getBoardList(page, searchDTO);
-        System.out.println("확인 : "+ searchDTO);
-        PageInfoDTO pageInfoDTO = boardService.pagingParam(page, searchDTO); //
-        int total = boardService.getListTotal(searchDTO);
+        List<CategoryInfoDTO> categoryList = categoryServiceImpl.getCategoryList();
 
-        System.out.println("boardList 확인 : "+boardList);
+        int total = boardService.getListTotal(searchDTO);
+        List<BoardInfoDTO> boardList = boardService.getBoardList(page, searchDTO);
+        PageInfoDTO pageInfoDTO = boardService.pageButton(page, searchDTO);
 
         model.addAttribute("list", boardList);
         model.addAttribute("total", total);
         model.addAttribute("paging", pageInfoDTO);
-        model.addAttribute("category",categoryList);
-        model.addAttribute("search",searchDTO);
+        model.addAttribute("category", categoryList);
+        model.addAttribute("search", searchDTO);
+
         return "board/list";
     }
-//
-//    //todo : 동적 리스트 total
-//    @GetMapping("/ajax/search/board-list.do")
-//    public ResponseEntity<Map<String, Object>> getSearchBoardList(
-//            @RequestParam(value = "startDate", required = false) String startDate,
-//            @RequestParam(value = "endDate", required = false) String endDate,
-//            @RequestParam(value = "categoryId", required = false) Integer categoryId,  // int에서 Integer로 변경
-//            @RequestParam(value = "searchKeyword", required = false) String searchKeyword) {
-//
-//        System.out.println("startDate = " + startDate + ", endDate = " + endDate + ", categoryId = " + categoryId + ", searchKeyword = " + searchKeyword);
-//        List<SearchDTO> searchLists = boardService.getListBySearch(startDate, endDate, categoryId, searchKeyword);
-//        int searchListsTotal = boardService.getSearchListTotal(startDate, endDate, categoryId, searchKeyword);
-//
-//        Map<String, Object> response = new HashMap<>();
-//        response.put("searchLists", searchLists);
-//        response.put("searchListsTotal", searchListsTotal);
-////        model.addAttribute("total", total);
-////        model.addAttribute("searchLists", searchLists);
-//
-//        return ResponseEntity.ok(response);
-//    }
 
+    /** 글 작성 */
     @GetMapping("/board-post-page")
-    public String postPage() {
+    public String postPage(Model model) {
+        List<CategoryInfoDTO> categoryList = categoryServiceImpl.getCategoryList();
+        model.addAttribute("category", categoryList);
         return "board/post";
     }
 
+    /**
+     * @param boardInfoDTO : 입력받은 데이터
+     */
     @ResponseBody
     @PostMapping("/ajax/board-save.do")
-    public Map<String, String> ajaxSaveBoard(BoardInfoDTO boardInfoDTO) {
-        System.out.println("보드 확인 : "+boardInfoDTO);
-        return boardService.saveBoard(boardInfoDTO);
+    public ResponseEntity<?> ajaxSaveBoard(BoardInfoDTO boardInfoDTO) {
+        if (boardInfoDTO == null) throw new CustomException(ExceptionErrorCode.NULL_POINTER_EXCEPTION);
+        int boardId = boardService.saveBoard(boardInfoDTO);
+
+        if (boardInfoDTO.getFiles() != null && !boardInfoDTO.getFiles().isEmpty()) {
+            fileServiceImpl.saveFiles(boardId, boardInfoDTO.getFiles());
+        }
+
+        SuccessResponseDTO successResponse = SuccessResponseDTO.builder()
+                .statusCode(200)
+                .message("게시글이 성공적으로 등록되었습니다.")
+                .redirectUrl("board-detail-page?boardId=" + boardId+ "&viewSet=yes")
+                .build();
+        return new ResponseEntity<>(successResponse, HttpStatus.OK);
     }
 
     //todo : @PathVariable과 @RequestParam(쿼리 스트링으로 받음 -> 가변적일 때 )의 차이점
 
+    /**
+     * 상세보기
+     * @param boardId : 게시글 pk
+     * @param viewSet : 조회수
+     * @return
+     */
     @GetMapping("/board-detail-page")
     public String detailPage(@RequestParam("boardId") int boardId,
                              @RequestParam(value = "viewSet", defaultValue = "no") String viewSet, Model model) {
@@ -99,46 +101,60 @@ public class BoardController {
             return "redirect:board-detail-page?boardId=" + boardId;
         }
 
-        BoardInfoDTO boardDetail = boardService.getDetailByBoardId(boardId);
-        List<CommentInfoDTO> commentDetail = commentService.getDetailByBoardId(boardId);
+        try {
+            BoardInfoDTO boardDetail = boardService.getDetailByBoardId(boardId);
+            List<CommentInfoDTO> commentDetail = commentService.getCommentDetailByBoardId(boardId);
 
-        model.addAttribute("detail", boardDetail);
-        model.addAttribute("comment", commentDetail);
-        return "board/detail"; //todo : ResponseEntity
+            model.addAttribute("detail", boardDetail);
+            model.addAttribute("comment", commentDetail);
+            return "board/detail";
+        }
+        catch (CustomException e) {
+            if (e.getExceptionErrorCode() == ExceptionErrorCode.BOARD_NOT_FOUND) {
+                return "error/404";
+            }
+            throw e;
+        }
     }
 
+    /**
+     * 비밀번호 일치 확인
+     * @param boardId 게시글 pk
+     * @return 체크하는 뷰
+     */
     @GetMapping("/board-delete-check")
     public String checkPassword(@RequestParam("boardId") int boardId, Model model) {
         model.addAttribute("boardId", boardId);
         return "board/password-check";
     }
 
+    /**
+     * 비밀번호 확인 후 삭제
+     * @param boardInfoDTO
+     * @return
+     */
     @PostMapping("/ajax/delete-check.do")
     public ResponseEntity<?> checkPassword(BoardInfoDTO boardInfoDTO) {
-        System.out.println("boardInfoDTO = " + boardInfoDTO);
-        boolean result = boardService.checkPassword(boardInfoDTO);
+        boardService.checkPassword(boardInfoDTO);
 
-        if (result) {
-            SuccessResponseDTO successResponse = SuccessResponseDTO.builder()
-                    .statusCode(200)
-                    .message("게시글이 성공적으로 삭제되었습니다.")
-                    .redirectUrl("/board-list")
-                    .build();
-            return new ResponseEntity<>(successResponse, HttpStatus.OK);
-        } else {
-            ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
-                    .statusCode(401)
-                    .message("비밀번호가 일치하지 않습니다.")
-                    .errorDetails("입력하신 비밀번호가 일치하지 않습니다. 다시 시도해 주세요.")
-                    .build();
-            return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
-        }
+        SuccessResponseDTO successResponse = SuccessResponseDTO.builder()
+                .statusCode(200)
+                .message("게시글이 성공적으로 삭제되었습니다.")
+                .redirectUrl("/board-list")
+                .build();
+        return new ResponseEntity<>(successResponse, HttpStatus.OK);
     }
 
+    /**
+     *
+     * @param boardId
+     * @param page
+     * @param model
+     * @return
+     */
     @GetMapping("/board-update-page")
     public String updatePage(@RequestParam("boardId") int boardId, @RequestParam(value = "page", required = false, defaultValue = "1") int page, Model model) {
         BoardInfoDTO boardDetail = boardService.getDetailByBoardId(boardId);
-        System.out.println("boardDetail     : " +boardDetail );
 
         List<FileInfoDTO> files = fileServiceImpl.findFileIdByBoardId(boardId);
         System.out.println("files      : "+files);
@@ -153,30 +169,27 @@ public class BoardController {
             @PathVariable int boardId,
             @RequestParam(value = "deleteFileIds[]", required = false) List<Integer> deleteFileIds,
             @RequestParam(value = "files", required = false) List<MultipartFile> files,
-            BoardInfoDTO boardInfoDTO) {
-        System.out.println("엡데이트?");
-        System.out.println("업뎃할 보드 아이디" + boardId);
-        System.out.println("삭제할 파일 이이디 :    "+deleteFileIds);
-        System.out.println("새로 등록할 파일 이이디 :    "+files);
-        System.out.println("수정된 보드 내용 : "+ boardInfoDTO);
+            BoardInfoDTO boardInfoDTO) throws IOException {
 
         //새로운 파일 저장
         if (files != null && !files.isEmpty()) {
             fileServiceImpl.saveFiles(boardId, files);
         }
 
+        //기존 파일 삭제
         if (deleteFileIds != null && !deleteFileIds.isEmpty()) {
-            // 삭제할 파일 조회
-            List<FileInfoDTO> deleteFiles = fileServiceImpl.findAllFileByIds(deleteFileIds);
-            // 파일 삭제 (from disk)
-            fileUtils.deleteFiles(deleteFiles);
-            // 파일 삭제 (from database)
-            fileServiceImpl.deleteAllFileByIds(deleteFileIds);
+            List<FileInfoDTO> deleteFiles = fileServiceImpl.findFileByFileIds(deleteFileIds); // 삭제할 파일 조회
+            fileUtils.deleteFiles(deleteFiles); // 파일 삭제 (from disk)
+            fileServiceImpl.deleteFileByFileIds(deleteFileIds);  // 파일 삭제 (from database)
         }
-        //게시글 내용 수정 todo: 부분적으로 수정하고 있는데 (게시글 제목, 내용만) 수정하지 못하게한 부분도 전부 받아와서 update해줘야 하나?
-        Map<String, String> response = boardService.updateBoard(boardInfoDTO);
 
-        return ResponseEntity.ok(response);
+        //게시글 내용 수정
+        boardService.updateBoard(boardInfoDTO);
+        SuccessResponseDTO successResponse = SuccessResponseDTO.builder()
+                .statusCode(200)
+                .message("게시글이 성공적으로 수정되었습니다.")
+                .redirectUrl("board-detail-page?boardId=" + boardInfoDTO.getBoardId() + "&viewSet=yes")
+                .build();
+        return new ResponseEntity<>(successResponse, HttpStatus.OK);
     }
-
 }

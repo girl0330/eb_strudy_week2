@@ -30,8 +30,8 @@
         ORDER BY system_register_datetime DESC
     </select>
 
-    <select id="getDetailByBoardId" parameterType="int" resultType="com.sb.sbweek3.dto.CommentInfoDTO">
-        SELECT /*CommentMapper.getDetailByBoardId*/
+    <select id="getCommentDetailByBoardId" parameterType="int" resultType="com.sb.sbweek3.dto.CommentInfoDTO">
+        SELECT /*CommentMapper.getCommentDetailByBoardId*/
             comment_id,
             board_id,
             comment_content,

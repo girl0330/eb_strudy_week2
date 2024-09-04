@@ -1,6 +1,8 @@
 package com.sb.sbweek3.common;
 
 import com.sb.sbweek3.dto.FileInfoDTO;
+import com.sb.sbweek3.exception.CustomException;
+import com.sb.sbweek3.exception.ExceptionErrorCode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -10,6 +12,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
@@ -32,8 +35,6 @@ public class FileUtils {
      * @return DB에 저장할 파일 정보 List
      */
     public List<FileInfoDTO> uploadFiles(final List<MultipartFile> multipartFiles) {
-
-        System.out.println("넘어온 파일들 확인 : "+multipartFiles);
         List<FileInfoDTO> files = new ArrayList<>();
         for (MultipartFile multipartFile : multipartFiles) {
             if (multipartFile.isEmpty()) {
@@ -41,7 +42,6 @@ public class FileUtils {
             }
             files.add(uploadFile(multipartFile));
         }
-        System.out.println("파일 확인 함;;;"+files);
         return files;
     }
 
@@ -51,7 +51,6 @@ public class FileUtils {
      */
     public FileInfoDTO uploadFile(final MultipartFile multipartFile) {
 
-        System.out.println("업로드 하기 위한 과정까지 넘어왔어?");
         if (multipartFile.isEmpty()) {
             return null;
         }
@@ -60,16 +59,16 @@ public class FileUtils {
         String fileType = separateFileType(multipartFile.getOriginalFilename()); //확장자
         String uploadPath = path;
 
-        try {
-            File uploadDirFile = new File(uploadPath);
-            if (!uploadDirFile.exists()) {
-                uploadDirFile.mkdirs(); // 디렉토리 생성
-            }
+        File uploadDirFile = new File(uploadPath);
+        if (!uploadDirFile.exists()) {
+            uploadDirFile.mkdirs(); // 디렉토리 생성
+        }
 
+        try {
             File targetFile = new File(uploadDirFile, savedName);
             multipartFile.transferTo(targetFile); // 파일 저장
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new CustomException(ExceptionErrorCode.GENERIC_ERROR, "파일 저장 중 오류가 발생했습니다.");
         }
 
         return FileInfoDTO.builder()
@@ -103,33 +102,30 @@ public class FileUtils {
 
     /**
      * 파일 삭제 (from Disk)
-     * @param files - 삭제할 파일 정보 List
+     * @param files - 삭제할 파일 FileInfoDTO 리스트
      */
-    public void deleteFiles(final List<FileInfoDTO> files) {
-        System.out.println("disk에서 파일 삭제 : "+files);
+    public void deleteFiles(final List<FileInfoDTO> files) throws IOException {
         if (CollectionUtils.isEmpty(files)) {
             return;
         }
         for (FileInfoDTO file : files) {
-            System.out.println("삭제할 파일 이름 확인 : "+file.getSavedFilename());
             deleteFile(file.getSavedFilename());
         }
     }
 
     /**
      * 파일 삭제 (from Disk)
-     * @param savedFileName - 저장된 이름
+     * @param savedFileName : 삭제할 파일 이름
      */
-    private void deleteFile(final String savedFileName) {
+
+    private void deleteFile(final String savedFileName) throws IOException {
         File file = new File(path + File.separator + savedFileName);
         if (file.exists()) {
-            if (file.delete()) {
-                System.out.println("파일 삭제 성공: " + savedFileName);
-            } else {
-                System.out.println("파일 삭제 실패: " + savedFileName);
+            if (!file.delete()) {
+                throw new IOException("파일 삭제 실패: " + savedFileName);
             }
         } else {
-            System.out.println("파일이 존재하지 않습니다: " + savedFileName);
+            throw new FileNotFoundException("파일이 존재하지 않습니다: " + savedFileName);
         }
     }
 

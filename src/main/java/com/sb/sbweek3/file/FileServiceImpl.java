@@ -13,6 +13,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class FileServiceImpl {
 
     private final FileMapper fileMapper;
@@ -23,7 +24,7 @@ public class FileServiceImpl {
      * @param boardId - 파일 저장할 게시글 번호 pk
      * @param multiFiles - 파일
      */
-    @Transactional
+
     public void saveFiles(int boardId, List<MultipartFile> multiFiles) {
         List<FileInfoDTO> files = fileUtils.uploadFiles(multiFiles);
 
@@ -34,7 +35,6 @@ public class FileServiceImpl {
             file.setBoardId(boardId);
         }
 
-        System.out.println("filesSize확인 : "+ files);
         fileMapper.saveFiles(files);
     }
 
@@ -53,11 +53,11 @@ public class FileServiceImpl {
 
     /**
      *
-     * @param boardId - 삭제 파일 찾을 보드ID
-     * @return 삭제할 파일 정보
+     * @param deleteFileIds : 삭제 파일 pk 리스트
+     * @return : 삭제할 파일 FileInfoDTO 리스트
      */
-    public List<FileInfoDTO> findAllFileByIds(List<Integer> deleteFileIds) {
-        return fileMapper.findAllFileByIds(deleteFileIds);
+    public List<FileInfoDTO> findFileByFileIds(List<Integer> deleteFileIds) {
+        return fileMapper.findFileByFileIds(deleteFileIds);
     }
 
 
@@ -65,12 +65,11 @@ public class FileServiceImpl {
      * 파일 삭제 (from Database)
      * @param deleteFileIds - fileInfo의 pk
      */
-    @Transactional
-    public void deleteAllFileByIds(List<Integer> deleteFileIds) {
+    public void deleteFileByFileIds(List<Integer> deleteFileIds) {
         if (CollectionUtils.isEmpty(deleteFileIds)) {
             return;
         }
-        fileMapper.deleteAllByFileIds(deleteFileIds);
+        fileMapper.deleteFileByFileIds(deleteFileIds);
     }
 
     public FileInfoDTO findFileByFileId(int fileId) {

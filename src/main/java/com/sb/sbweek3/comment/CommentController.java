@@ -1,6 +1,8 @@
 package com.sb.sbweek3.comment;
 
 import com.sb.sbweek3.dto.CommentInfoDTO;
+import com.sb.sbweek3.exception.CustomException;
+import com.sb.sbweek3.exception.ExceptionErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -17,8 +19,10 @@ public class CommentController {
     @PostMapping("/comment/save")
     @ResponseBody
     public List<CommentInfoDTO> saveComment(@ModelAttribute CommentInfoDTO commentInfoDTO) { //댓글 내용, 보드Id
-        System.out.println("commentInfoDTO = " + commentInfoDTO);
+        if (commentInfoDTO == null) throw new CustomException(ExceptionErrorCode.NULL_POINTER_EXCEPTION);
+
         commentService.saveComment(commentInfoDTO);
+
         List<CommentInfoDTO> commentList = commentService.getCommentListByBoardId(commentInfoDTO.getBoardId());
         return commentList;
     }

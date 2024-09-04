@@ -65,7 +65,43 @@
 
     let boardSave = {
         init: function () {
+            //공백 검사
+            // if (this.emptyCheck()) { //true이면 고백임.
+            //     alert("공백임!");
+            //     return;
+            // }
+            // // 유효성 검사
+            // if (!this.validationCheck()) {
+            //     alert("유효성 검사 실패");
+            //     return;
+            // }
             this.formSubmit();
+        },
+        // 공백 검사
+        emptyCheck: function () {
+            let valid = false;
+            const writer = $('#writer').val();
+            const password = $('#password').val();
+            const title = $('#title').val();
+            const content = $('#content').val();
+            const removeBlank = comment.replace(/\s*/g, "");
+
+            if (removeBlank === "") {
+                let text = $('#commentContent').data('name');
+                alert(text + "이 비여있습니다.");
+                $('#commentContent').focus();
+                valid = true;
+            }
+            return valid;
+        },
+        // 유효성 검사
+        validationCheck: function () {
+            let valid = true;
+            const writer = $('#writer').val();
+            const password = $('#password').val();
+            const title = $('#title').val();
+            const content = $('#content').val();
+
         },
 
         //전송 함수 정의
@@ -83,11 +119,13 @@
                 data: formData,
                 processData: false,  // 데이터의 처리를 방지 (FormData 사용 시 필요)
                 contentType: false,  // Content-Type 헤더 설정을 방지 (FormData 사용 시 필요)
-                success: function(response) {
-                    console.log('파일 업로드 성공:', response);
-                    if (response.code === "success") {
-                        alert(response.message);
-                        location.href="/board-list";
+                success: function(data) {
+                    console.log('파일 업로드 성공:', data);
+                    if (data.statusCode === 200) {
+                        if (data.redirectUrl) {
+                            alert(data.message);
+                            window.location.href = data.redirectUrl;
+                        }
                     }
                 },
                 error: function(xhr, status, error) {
@@ -121,18 +159,9 @@
                 <td class="input-field">
                     <select id="categoryId" name="categoryId" value="" data-name="카테고리">
                         <option value="0">카테고리 선택</option>
-                        <option value="1">Java</option>
-                        <option value="3">Python</option>
-                        <option value="4">JavaScript</option>
-                        <option value="5">HTML/CSS</option>
-                        <option value="6">Django</option>
-                        <option value="7">Flask</option>
-                        <option value="8">Spring Boot</option>
-                        <option value="9">React.js</option>
-                        <option value="10">Vue.js</option>
-                        <option value="11">Node.js</option>
-                        <option value="12">Angular</option>
-                        <option value="13">Servlet</option>
+                        <c:forEach var="category" items="${category}">
+                            <option value="${category.categoryId}">${category.category}</option>
+                        </c:forEach>
                     </select>
                 </td>
             </tr>

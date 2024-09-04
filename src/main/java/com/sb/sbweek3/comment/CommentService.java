@@ -18,8 +18,7 @@ public class CommentService {
         return commentMapper.getCommentListByBoardId(commentId);
     }
 
-    public List<CommentInfoDTO> getDetailByBoardId(int boardId) {
-        System.out.println("댓글 리스트 확인 : "+ commentMapper.getDetailByBoardId(boardId));
-        return commentMapper.getDetailByBoardId(boardId);
+    public List<CommentInfoDTO> getCommentDetailByBoardId(int boardId) {
+        return commentMapper.getCommentDetailByBoardId(boardId);
     }
 }

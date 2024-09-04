@@ -16,4 +16,10 @@ public class CustomException extends RuntimeException {
         this.exceptionErrorCode = exceptionErrorCode;
         this.userMessage = userMessage;
     }
+
+    public CustomException(ExceptionErrorCode exceptionErrorCode, String userMessage, Throwable cause) {
+        super(userMessage, cause);  // 여기서 cause는 원본 예외를 나타냄
+        this.exceptionErrorCode = exceptionErrorCode;
+        this.userMessage = userMessage;
+    }
 }

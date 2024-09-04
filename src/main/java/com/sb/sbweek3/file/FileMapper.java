@@ -27,9 +27,9 @@ public interface FileMapper {
     //todo : 제네릭타입에 원시타입을 사용할 수 없어서 mapper타입으로 사용했는데 통일성을 위해서 모두 integer로 바꿔줘야 하나?
     List<FileInfoDTO> findAllByIFileIds(List<FileInfoDTO> fileIds);
 
-    List<FileInfoDTO> findAllFileByIds(List<Integer> deleteFileIds);
+    List<FileInfoDTO> findFileByFileIds(List<Integer> deleteFileIds);
 
-    void deleteAllByFileIds(List<Integer> deleteFileIds);
+    void deleteFileByFileIds(List<Integer> deleteFileIds);
 
     FileInfoDTO findFileByFileId(int fileId);
 }

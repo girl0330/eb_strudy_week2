@@ -72,8 +72,8 @@
             file_id
     </select>
 
-    <select id="findAllFileByIds" parameterType="list" resultType="com.sb.sbweek3.dto.FileInfoDTO">
-        SELECT /*FileMapper.findAllFileByIds*/
+    <select id="findFileByFileIds" parameterType="list" resultType="com.sb.sbweek3.dto.FileInfoDTO">
+        SELECT /*FileMapper.findFileByFileIds*/
         <include refid="fileColumns" />
         FROM
             file_info fi
@@ -85,8 +85,8 @@
         </foreach>
     </select>
 
-    <update id="deleteAllByFileIds" parameterType="list">
-        UPDATE /*FileMapper.deleteAllByFileIds*/
+    <update id="deleteFileByFileIds" parameterType="list">
+        UPDATE /*FileMapper.deleteFileByFileIds*/
             file_info
         SET
             delete_yn = "y",

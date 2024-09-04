@@ -2,27 +2,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sb.sbweek3.board.free.BoardMapper">
 
-    <select id="pagingList" parameterType="map" resultType="com.sb.sbweek3.dto.BoardInfoDTO">
-        SELECT /*BoardMapper.pagingList*/
-            bi.board_id,
-            bi.category_id,
-            bi.writer,
-            bi.password,
-            bi.title,
-            bi.content,
-            bi.view_count,
-            bi.system_register_datetime,
-            bi.system_update_datetime,
-            ci.category
-        FROM
-            board_info bi
-        JOIN
-            category_info ci ON bi.category_id = ci.category_id
-        ORDER BY
-            bi.system_register_datetime DESC
-        LIMIT #{start}, #{limit}
-    </select>
-
     <select id="getBoardList" parameterType="com.sb.sbweek3.dto.SearchDTO" resultType="com.sb.sbweek3.dto.BoardInfoDTO">
         SELECT /*BoardMapper.getBoardList*/
             bi.board_id,
@@ -71,48 +50,6 @@
             </if>
             <if test="startDate != null and !startDate.isEmpty() and endDate != null and !endDate.isEmpty()">
                 AND system_register_datetime BETWEEN #{startDate} AND #{endDate}
-            </if>
-        </where>
-    </select>
-
-    <select id="getSearchListTotal" parameterType="com.sb.sbweek3.dto.SearchDTO" resultType="int">
-    SELECT /*BoardMapper.getSearchListTotal*/
-        COUNT(*) AS total_count
-    FROM board_info
-        <where>
-        <if test="categoryId != 0">
-            category_id = #{categoryId}
-        </if>
-        <if test="searchKeyword != null and !searchKeyword.isEmpty()">
-            AND title LIKE CONCAT('%', #{searchKeyword}, '%')
-        </if>
-        <if test="startDate != null and !startDate.isEmpty() and endDate != null and !endDate.isEmpty()">
-            AND system_register_datetime BETWEEN #{startDate} AND #{endDate}
-        </if>
-    </where>
-    </select>
-
-    <select id="getListBySearch" parameterType="com.sb.sbweek3.dto.SearchDTO" resultType="com.sb.sbweek3.dto.BoardInfoDTO">
-        SELECT /*BoardMapper.getListBySearch*/
-            bi.category_id,
-            (SELECT ci.category FROM category_info ci WHERE ci.category_id = bi.category_id) AS category_name,
-            bi.writer,
-            bi.password,
-            bi.title,
-            bi.content,
-            bi.view_count,
-            bi.system_register_datetime,
-            bi.system_update_datetime
-        FROM board_info bi
-        <where>
-            <if test="categoryId != 0">
-                bi.category_id = #{categoryId}
-            </if>
-            <if test="searchKeyword != null and !searchKeyword.isEmpty()">
-                AND bi.title LIKE CONCAT('%', #{searchKeyword}, '%')
-            </if>
-            <if test="startDate != null and !startDate.isEmpty() and endDate != null and !endDate.isEmpty()">
-                AND bi.system_register_datetime BETWEEN #{startDate} AND #{endDate}
             </if>
         </where>
     </select>
@@ -195,4 +132,12 @@
         WHERE
             board_id = #{boardId}
     </delete>
+
+
+    <select id="check" parameterType="int" resultType="int">
+        SELECT /*BoardMapper.check*/
+            COUNT(*)
+        FROM
+            board_info
+    </select>
 </mapper>

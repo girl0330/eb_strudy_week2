@@ -5,30 +5,21 @@ import com.sb.sbweek3.dto.PageInfoDTO;
 import com.sb.sbweek3.dto.SearchDTO;
 
 import java.util.List;
-import java.util.Map;
 
 public interface BoardService {
     List<BoardInfoDTO> getBoardList(int page, SearchDTO searchDTO);
 
-    PageInfoDTO pagingParam(int page, SearchDTO searchDTO);
+    PageInfoDTO pageButton(int page, SearchDTO searchDTO);
 
     int getListTotal(SearchDTO searchDTO);
 
-//    List<BoardInfoDTO> getList();
-
-//    int getSearchListTotal(String startDate, String endDate, int categoryId, String searchKeyword);
-//
-
-//    List<SearchDTO> getListBySearch(String startDate, String endDate, int categoryId, String searchKeyword);
-
-    Map<String, String> saveBoard(BoardInfoDTO boardInfoDTO);
+    int saveBoard(BoardInfoDTO boardInfoDTO);
 
     BoardInfoDTO getDetailByBoardId(int boardId);
 
+    void updateBoard(BoardInfoDTO boardInfoDTO);
 
-    Map<String, String> updateBoard(BoardInfoDTO boardInfoDTO);
-
-    boolean checkPassword(BoardInfoDTO boardInfoDTO);
+    void checkPassword(BoardInfoDTO boardInfoDTO);
 
     /* 조회수 처리 */
     void setView(int boardId);

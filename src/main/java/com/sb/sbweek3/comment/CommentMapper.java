@@ -11,5 +11,5 @@ public interface CommentMapper {
 
     List<CommentInfoDTO> getCommentListByBoardId(int commentId);
 
-    List<CommentInfoDTO> getDetailByBoardId(int boardId);
+    List<CommentInfoDTO> getCommentDetailByBoardId(int boardId);
 }
